@@ -6,13 +6,18 @@ var logger = require('morgan');
 const cors = require("cors");
 const bodyParser = require("body-parser");
 
+// Importation des routers
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const assignementRoutes = require("./routes/Assignement");
 
 var app = express();
 
 /* database connection */
 require("./config/database");
+
+app.use(cors({ origin: "*" }));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -24,8 +29,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// Definition des routes
+app.use('/Projet_Assignement', indexRouter);
+app.use('/Projet_Assignement/Assignements', assignementRoutes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -42,9 +48,5 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
-app.use(cors({ origin: "*" }));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
 
 module.exports = app;
