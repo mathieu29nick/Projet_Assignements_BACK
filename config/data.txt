@@ -1,0 +1,51 @@
+Collections :
+
+Professeur (Collection) : 
+    _id (ObjectID)
+    idProf (Int32)
+    nom (String)
+    email (String)
+    mdp (String)
+    photo (String)
+    matiere : [{
+        _id (ObjectID)
+        idMatiere (Int32)
+        libelle (String)
+        idNiveau (Int32)
+        assignements : [{
+            _id (ObjectID)
+            dateRendu (Date)
+            nomAssignement (String)
+            description (String)
+            detailAssignementEleve: [{
+                idEleve (Int32)
+                note (Double)
+                remarque (String)
+                dateRenduEleve (Date)
+                rendu (Boolean)
+            }]
+        }]
+    }]
+
+Niveau (Collection) :
+    _id (ObjectID)
+    idNiveau (Int32)
+    libelle (String)
+
+Eleve (Collection):
+    _id (ObjectID)
+    idEleve (Int32)
+    nom (String)
+    prenom (String)
+    email (String)
+    mdp (String)
+    niveau: [{
+        idNiveau (Int32)
+        etatNiveau (Boolean) (default=true)
+    }]
+
+Admin (Collection):
+    _id (ObjectID)
+    nom (String)
+    email (String)
+    mdp (String)

@@ -9,6 +9,10 @@ const bodyParser = require("body-parser");
 // Importation des routers
 var indexRouter = require('./routes/index');
 const assignementRoutes = require("./routes/Assignement");
+const adminRoutes = require("./routes/Admin");
+const niveauRoutes = require("./routes/Niveau");
+const eleveRoutes = require("./routes/Eleve");
+const professeurRoutes = require("./routes/Professeur");
 
 var app = express();
 
@@ -32,6 +36,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Definition des routes
 app.use('/Projet_Assignement', indexRouter);
 app.use('/Projet_Assignement/Assignements', assignementRoutes);
+app.use('/Projet_Assignement/Admin', adminRoutes);
+app.use('/Projet_Assignement/Niveau', niveauRoutes);
+app.use('/Projet_Assignement/Eleve', eleveRoutes);
+app.use('/Projet_Assignement/Professeur', professeurRoutes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
