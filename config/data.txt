@@ -12,6 +12,7 @@ Professeur (Collection) :
         idMatiere (Int32)
         libelle (String)
         idNiveau (Int32)
+        photo (String)
         assignements : [{
             _id (ObjectID)
             dateRendu (Date)

@@ -8,7 +8,6 @@ const bodyParser = require("body-parser");
 
 // Importation des routers
 var indexRouter = require('./routes/index');
-const assignementRoutes = require("./routes/Assignement");
 const adminRoutes = require("./routes/Admin");
 const niveauRoutes = require("./routes/Niveau");
 const eleveRoutes = require("./routes/Eleve");
@@ -35,7 +34,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Definition des routes
 app.use('/Projet_Assignement', indexRouter);
-app.use('/Projet_Assignement/Assignements', assignementRoutes);
 app.use('/Projet_Assignement/Admin', adminRoutes);
 app.use('/Projet_Assignement/Niveau', niveauRoutes);
 app.use('/Projet_Assignement/Eleve', eleveRoutes);
