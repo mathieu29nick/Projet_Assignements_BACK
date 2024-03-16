@@ -15,3 +15,15 @@ exports.getProfesseur = async (res) => {
     });
   }
 };
+
+exports.login = async (mail, mdp, res) => {
+  try {
+    const data = await Professeur.findOne({ email: mail, mdp: mdp });
+    return data;
+  } catch (err) {
+    res.status(400).json({
+      status: 400,
+      message: err.message,
+    });
+  }
+};

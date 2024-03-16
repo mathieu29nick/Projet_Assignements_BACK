@@ -15,3 +15,15 @@ exports.getAdmin = async (res) => {
     });
   }
 };
+
+exports.login = async (email, mdp) => {
+  try {
+    let data = await Admin.findOne({ email: email, mdp: mdp });
+    return data;
+  } catch (err) {
+    res.status(400).json({
+      status: 400,
+      message: err.message,
+    });
+  }
+};

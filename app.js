@@ -12,6 +12,7 @@ const adminRoutes = require("./routes/Admin");
 const niveauRoutes = require("./routes/Niveau");
 const eleveRoutes = require("./routes/Eleve");
 const professeurRoutes = require("./routes/Professeur");
+const utilisateurRoutes = require("./routes/Utilisateur");
 
 var app = express();
 
@@ -33,11 +34,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Definition des routes
-app.use('/Projet_Assignement', indexRouter);
-app.use('/Projet_Assignement/Admin', adminRoutes);
-app.use('/Projet_Assignement/Niveau', niveauRoutes);
-app.use('/Projet_Assignement/Eleve', eleveRoutes);
-app.use('/Projet_Assignement/Professeur', professeurRoutes);
+app.use('', indexRouter);
+app.use('/Admin', adminRoutes);
+app.use('/Niveau', niveauRoutes);
+app.use('/Eleve', eleveRoutes);
+app.use('/Professeur', professeurRoutes);
+app.use("/Utilisateur", utilisateurRoutes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
