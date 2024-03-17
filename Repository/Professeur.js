@@ -1,8 +1,6 @@
 var { Professeur } = require("../Model/Professeur");
-var ObjectID = require("mongoose").Types.ObjectId;
-var nodemailer = require("nodemailer");
-const { Console } = require("console");
-const { BSONSymbol } = require("mongodb");
+var config = require('../config/SECRET');
+var jwt = require('jsonwebtoken');
 
 exports.getProfesseur = async (res) => {
   try {
@@ -16,14 +14,37 @@ exports.getProfesseur = async (res) => {
   }
 };
 
-exports.login = async (mail, mdp, res) => {
+exports.login = async (email, mdp, res) => {
   try {
-    const data = await Professeur.findOne({ email: mail, mdp: mdp });
-    return data;
+    let prof = await Professeur.findOne({ email: email,mdp:mdp });
+    if (!prof) {
+      return res.status(404).json({
+        status: 404,
+        message: "Identifiant non trouvé!",
+      });
+    }
+    
+    const payload = {
+      prof: {
+        id: prof.idProf,
+      },
+    };
+
+    jwt.sign(
+      payload,
+      config.secret,
+      { expiresIn: 3600 },
+      (err, token) => {
+        if (err) throw err;
+        console.log("Access TOKEN :", token);
+        res.json({ token });
+      }
+    );
+    return prof;
   } catch (err) {
-    res.status(400).json({
-      status: 400,
-      message: err.message,
+    res.status(500).json({
+      status: 500,
+      message: "Erreur serveur.",
     });
   }
 };

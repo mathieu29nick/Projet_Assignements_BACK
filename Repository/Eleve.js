@@ -1,8 +1,6 @@
 var { Eleve } = require("../Model/Eleve");
-var ObjectID = require("mongoose").Types.ObjectId;
-var nodemailer = require("nodemailer");
-const { Console } = require("console");
-const { BSONSymbol } = require("mongodb");
+var config = require('../config/SECRET');
+var jwt = require('jsonwebtoken');
 
 exports.getEleve = async (res) => {
   try {
@@ -16,14 +14,37 @@ exports.getEleve = async (res) => {
   }
 };
 
-exports.login = async (mail, mdp, res) => {
+exports.login = async (email, mdp, res) => {
   try {
-    const data = await Eleve.findOne({ email: mail, mdp: mdp });
-    return data;
+    let eleve = await Eleve.findOne({ email: email,mdp:mdp });
+    if (!eleve) {
+      return res.status(404).json({
+        status: 404,
+        message: "Identifiant non trouvé!",
+      });
+    }
+    
+    const payload = {
+      eleve: {
+        id: eleve.idEleve,
+      },
+    };
+
+    jwt.sign(
+      payload,
+      config.secret,
+      { expiresIn: 3600 },
+      (err, token) => {
+        if (err) throw err;
+        console.log("Access TOKEN :", token);
+        res.json({ token });
+      }
+    );
+    return eleve;
   } catch (err) {
-    res.status(400).json({
-      status: 400,
-      message: err.message,
+    res.status(500).json({
+      status: 500,
+      message: "Erreur serveur.",
     });
   }
 };

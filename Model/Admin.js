@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 
 // Creation du schéma Admin
 const adminSchema = new Schema({
+    idAdmin : {type :Number},
     nom: {type:String},
     email: {type:String},
     mdp: {type:String},

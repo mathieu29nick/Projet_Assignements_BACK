@@ -1,8 +1,4 @@
 var { Niveau } = require("../Model/Niveau");
-var ObjectID = require("mongoose").Types.ObjectId;
-var nodemailer = require("nodemailer");
-const { Console } = require("console");
-const { BSONSymbol } = require("mongodb");
 
 exports.getNiveau = async (res) => {
   try {
