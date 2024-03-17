@@ -4,5 +4,6 @@ const router = express.Router();
 const eleveControlleur = require('../Controlleur/EleveController')
  
 router.get('/', eleveControlleur.getEleve);
+router.put("/:eleve_id", eleveControlleur.updateEleve);
 
 module.exports = router;

@@ -49,3 +49,16 @@ exports.login = async (email, mdp, res) => {
   }
 };
 
+// Modification élève
+exports.updateEleve = async (id, eleve, res) => {
+  try {
+    let data = await Eleve.findOneAndUpdate({ _id: id }, eleve, {
+      new: true,
+      runValidators: true,
+    });
+    return data;
+  } catch (err) {
+    res.status(404).json({ msg: err });
+  }
+};
+
