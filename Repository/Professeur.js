@@ -1,6 +1,7 @@
 var { Professeur } = require("../Model/Professeur");
 var config = require('../config/SECRET');
 var jwt = require('jsonwebtoken');
+var ObjectID = require("mongoose").Types.ObjectId;
 
 exports.getProfesseur = async (res) => {
   try {
@@ -48,3 +49,39 @@ exports.login = async (email, mdp, res) => {
     });
   }
 };
+
+
+// Liste matière d'un prof
+exports.listeMatiereProf = async (idProf, res) => {
+  try{
+    const match =  { $match: { _id: ObjectID(idProf) } };
+    var unwind = { $unwind: "$matiere" };
+    var lookup = {
+      $lookup: {
+        from: "Niveau",
+        localField: "matiere.idNiveau",
+        foreignField: "idNiveau",
+        as: "niveau",
+      },
+    };
+    var project = { $project: { "_id": "$matiere._id",
+    "idMatiere": "$matiere.idMatiere",
+    "libelle": "$matiere.libelle",
+    "idNiveau": "$matiere.idNiveau",
+    "libelleNiveau": {
+      $cond: {
+          if: { $eq: [{ $size: "$niveau" }, 0] }, // Vérifie si le tableau est vide
+          then: null, // Définit libelleNiveau à null si le tableau est vide
+          else: { $arrayElemAt: ["$niveau.libelle", 0] } // Sinon, extrait le premier élément du tableau
+      }
+     },
+    "photo": "$matiere.photo"} };
+    let data = await Professeur.aggregate([unwind, match, lookup,project]);
+    return data;
+  }catch (err) {
+    res.status(500).json({
+      status: 500,
+      message: "Erreur serveur. "+err.message,
+    });
+  }
+}
