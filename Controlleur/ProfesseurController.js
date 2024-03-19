@@ -34,4 +34,10 @@ exports.insertMatiere = async (req, res) => {
     .catch();
 };
 
+exports.insertionAssignementMatiere = async (req, res) => {
+  professeurRepository
+    .insertionAssignementMatiere(req.params.idProf,req.params.idMatiere,req.body.dateRendu,req.body.nomAssignement,req.body.description,res)
+    .then((result) => res.status(200).json({ result }))
+    .catch();
+};
 

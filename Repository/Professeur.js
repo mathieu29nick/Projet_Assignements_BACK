@@ -2,6 +2,7 @@ var { Professeur } = require("../Model/Professeur");
 var config = require('../config/SECRET');
 var jwt = require('jsonwebtoken');
 var ObjectID = require("mongoose").Types.ObjectId;
+const eleveRepository = require("../Repository/Eleve");
 
 exports.getProfesseur = async (res) => {
   try {
@@ -179,5 +180,47 @@ exports.insertionMatiere = async (idProf,libelle,idNiveau,photo,res) => {
   }
 };
 
+// insertion d'une assignement d'une matière par un Professeur
+exports.insertionAssignementMatiere = async (idProf,idMatiere,dateRendu,nomAss,desc,res) => {
+  try {
+    let detailAssignementEleve=[];
+    let listeEleve = await eleveRepository.getEleve();
+    
+    for(var i=0;i<listeEleve.length;i++){
+        detailAssignementEleve.push({
+            idEleve : Number(listeEleve[i].idEleve),
+            note : 0,
+            remarque : "",
+            dateRenduEleve : null,
+            rendu : false
+        });
+    }
 
+    const assignement = {
+      _id : ObjectID(),
+      dateRenduEleve : new Date(dateRendu),
+      nomAssignement : nomAss,
+      description : desc,
+      status : false,
+      detailAssignementEleve : detailAssignementEleve
+    };
 
+    await Professeur.findOneAndUpdate(
+      {
+        _id : ObjectID(idProf),
+        "matiere._id" : ObjectID(idMatiere)
+      },
+      {
+        $push: {
+          "matiere.$.assignements": assignement,
+        },
+      }
+    );
+    return assignement;
+  } catch (err) {
+        res.status(400).json({
+        status: 400,
+        message: err.message,
+    });
+  }
+};
