@@ -16,35 +16,29 @@ exports.getEleve = async (res) => {
 
 exports.login = async (email, mdp, res) => {
   try {
-    let eleve = await Eleve.findOne({ email: email,mdp:mdp });
-    if (!eleve) {
-      return res.status(404).json({
-        status: 404,
-        message: "Identifiant non trouvé!",
+    let eleve = await Eleve.findOne({ email: email,mdp:mdp }).select("-mdp");
+    if(eleve){
+      const payload = {
+        eleve: {
+          id: eleve._id,
+        },
+      };
+  
+      let token = await new Promise((resolve, reject) => {
+        jwt.sign(payload, config.secret, { expiresIn: 3600 }, (err, token) => {
+          if (err) reject(err);
+          console.log("Access TOKEN :", token);
+          resolve(token); // Résoudre la promesse avec le token
+        });
       });
+      eleve.niveau = eleve.niveau.filter(niveau => niveau.etatNiveau === true).map(niveau => niveau.idNiveau);
+      return {eleve,token};
     }
-    
-    const payload = {
-      eleve: {
-        id: eleve.idEleve,
-      },
-    };
-
-    jwt.sign(
-      payload,
-      config.secret,
-      { expiresIn: 3600 },
-      (err, token) => {
-        if (err) throw err;
-        console.log("Access TOKEN :", token);
-        res.json({ token });
-      }
-    );
     return eleve;
   } catch (err) {
     res.status(500).json({
       status: 500,
-      message: "Erreur serveur.",
+      message: "Erreur serveur."+err.message,
     });
   }
 };
