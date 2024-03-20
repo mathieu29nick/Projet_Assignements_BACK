@@ -320,6 +320,9 @@ exports.getOneAssignementModifierNote = async (idAss, idEleve,note,remarque,res)
     res.status(500).json({
       status: 500,
       message: "Erreur serveur. " + err.message,
+    })
+  }
+}
 
 // get liste prof
 exports.getAllProf = async (page,pageNumber,res) => {
