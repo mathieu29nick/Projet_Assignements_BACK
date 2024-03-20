@@ -62,3 +62,14 @@ exports.updateEleve = async (id, eleve, res) => {
   }
 };
 
+exports.getOneEleve = async (id,res) => {
+  try {
+    let data = await Eleve.findOne({idEleve : Number(id)});
+    return data;
+  } catch (err) {
+        res.status(400).json({
+        status: 400,
+        message: err.message,
+    });
+  }
+};

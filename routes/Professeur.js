@@ -7,6 +7,7 @@ router.get('/', professeurControlleur.getProfesseur);
 router.get('/matieres', professeurControlleur.listeMatiereProf);
 router.get("/allmatieres", professeurControlleur.listeMatiere);
 router.put('/:idProf', professeurControlleur.insertMatiere);
-router.put('/insertionAssigmentMatiere/:idProf/:idMatiere', professeurControlleur.insertionAssignementMatiere);
+router.put('/insertionAssigmentMatiere/:idMatiere', professeurControlleur.insertionAssignementMatiere);
+router.put('/assignementNoteModifier/:idAss/:idEleve', professeurControlleur.getOneAssignementModifierNote);
 
 module.exports = router;

@@ -71,9 +71,9 @@ exports.listeMatiereProf = async (idProf, res) => {
     "idNiveau": "$matiere.idNiveau",
     "libelleNiveau": {
       $cond: {
-          if: { $eq: [{ $size: "$niveau" }, 0] }, // Vérifie si le tableau est vide
-          then: null, // Définit libelleNiveau à null si le tableau est vide
-          else: { $arrayElemAt: ["$niveau.libelle", 0] } // Sinon, extrait le premier élément du tableau
+          if: { $eq: [{ $size: "$niveau" }, 0] }, 
+          then: null, 
+          else: { $arrayElemAt: ["$niveau.libelle", 0] } 
       }
      },
     "photo": "$matiere.photo"} };
@@ -181,7 +181,7 @@ exports.insertionMatiere = async (idProf,libelle,idNiveau,photo,res) => {
 };
 
 // insertion d'une assignement d'une matière par un Professeur
-exports.insertionAssignementMatiere = async (idProf,idMatiere,dateRendu,nomAss,desc,res) => {
+exports.insertionAssignementMatiere = async (idMatiere,dateRendu,nomAss,desc,res) => {
   try {
     let detailAssignementEleve=[];
     let listeEleve = await eleveRepository.getEleve();
@@ -189,7 +189,7 @@ exports.insertionAssignementMatiere = async (idProf,idMatiere,dateRendu,nomAss,d
     for(var i=0;i<listeEleve.length;i++){
         detailAssignementEleve.push({
             idEleve : Number(listeEleve[i].idEleve),
-            note : 0,
+            note : null,
             remarque : "",
             dateRenduEleve : null,
             rendu : false
@@ -207,7 +207,6 @@ exports.insertionAssignementMatiere = async (idProf,idMatiere,dateRendu,nomAss,d
 
     await Professeur.findOneAndUpdate(
       {
-        _id : ObjectID(idProf),
         "matiere._id" : ObjectID(idMatiere)
       },
       {
@@ -224,3 +223,111 @@ exports.insertionAssignementMatiere = async (idProf,idMatiere,dateRendu,nomAss,d
     });
   }
 };
+
+// Ajout et modification d'une note
+
+function generateRemarque(note) {
+  if (note >= 0 && note <= 9) {
+      return "Médiocre! ";
+  } else if (note >= 10 && note <= 12) {
+      return "Assez Bien! ";
+  } else if (note > 12 && note <= 15) {
+      return "Bien! ";
+  } else if (note >= 16 && note <= 20){
+      return "Trés Bien! ";
+  }else{
+      return "";
+  }
+}
+
+//get 1 assignement à modifier
+exports.getOneAssignementModifierNote = async (idAss, idEleve,note,remarque,res) => {
+  try {
+    let data = await Professeur.findOne({
+      "matiere.assignements": {
+        $elemMatch: {
+          _id: ObjectID(idAss),
+          "detailAssignementEleve.idEleve": Number(idEleve)
+        }
+      }
+    }, {
+      "matiere.$": 1
+    });
+    
+    let assignement = null;
+    if (data && data.matiere && data.matiere.length > 0) {
+      let matiere = data.matiere[0];
+      if (matiere.assignements && matiere.assignements.length > 0) {
+        let assignements = matiere.assignements.filter(ass => ass._id.toString() === idAss);
+        if (assignements.length > 0 && assignements[0].detailAssignementEleve && assignements[0].detailAssignementEleve.length > 0) {
+          assignement = assignements[0].detailAssignementEleve.find(eleve => eleve.idEleve === Number(idEleve));
+          if (assignement) {
+            const eleveData = await eleveRepository.getOneEleve(assignement.idEleve);
+            if (eleveData) {
+              assignement.nomEleve = eleveData.nom;
+              assignement.prenomEleve = eleveData.prenom;
+            }
+          }
+        }
+      }
+    }
+    
+    if(!assignement.rendu || assignement.dateRenduEleve==null || assignement.dateRendu==""){
+      return res.status(404).json({
+        status: 404,
+        message: "L'assignement n'est pas encore rendu par "+assignement.nomEleve+" "+assignement.prenomEleve+"!",
+      });
+    }
+   
+    if(note<0 || note>20){
+      return res.status(404).json({
+        status: 404,
+        message: "Veuillez entrer une note valide!!",
+      });
+    }
+
+    const professeur = await Professeur.findOneAndUpdate(
+      {
+        "matiere.assignements": {
+          $elemMatch: {
+            _id: ObjectID(idAss),
+            "detailAssignementEleve.idEleve": Number(idEleve)
+          }
+        }
+      },
+      {
+        $set: {
+          "matiere.$[elem].assignements.$[assign].detailAssignementEleve.$[detail].note":note,
+          "matiere.$[elem].assignements.$[assign].detailAssignementEleve.$[detail].remarque": generateRemarque(note)+remarque
+        }
+      },
+      {
+        arrayFilters: [
+          { "elem._id": ObjectID("65f9df48a74d8df8ff3738a2") },
+          { "assign._id": ObjectID(idAss) },
+          { "detail.idEleve": Number(idEleve) }
+        ],
+        new: true
+      }
+    );
+
+    if (!professeur) {
+      return res.status(404).json({
+        status: 404,
+        message: "Assignement introuvable!",
+      });
+    }
+
+    return res.status(200).json({
+      status: 200,
+      message: "Détails d'assignement modifiés avec succès.",
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      status: 500,
+      message: "Erreur serveur. " + err.message,
+    });
+  }
+}
+

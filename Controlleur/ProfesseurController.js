@@ -36,8 +36,16 @@ exports.insertMatiere = async (req, res) => {
 
 exports.insertionAssignementMatiere = async (req, res) => {
   professeurRepository
-    .insertionAssignementMatiere(req.params.idProf,req.params.idMatiere,req.body.dateRendu,req.body.nomAssignement,req.body.description,res)
+    .insertionAssignementMatiere(req.params.idMatiere,req.body.dateRendu,req.body.nomAssignement,req.body.description,res)
     .then((result) => res.status(200).json({ result }))
     .catch();
 };
 
+exports.getOneAssignementModifierNote = async (req, res) => {
+  try {
+    res.status(200).json({
+      status: 200,
+      data: await professeurRepository.getOneAssignementModifierNote(req.params.idAss,req.params.idEleve,req.body.note,req.body.remarque,res),
+    });
+  } catch (err) {}
+};
