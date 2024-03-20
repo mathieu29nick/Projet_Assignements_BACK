@@ -21,7 +21,7 @@ exports.login = async (email, mdp, res) => {
     if(admin){
       const payload = {
         admin: {
-          id: admin.idAdmin,
+          id: admin._id,
         },
       };
   
