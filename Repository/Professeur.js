@@ -18,35 +18,28 @@ exports.getProfesseur = async (res) => {
 
 exports.login = async (email, mdp, res) => {
   try {
-    let prof = await Professeur.findOne({ email: email,mdp:mdp });
-    if (!prof) {
-      return res.status(404).json({
-        status: 404,
-        message: "Identifiant non trouvé!",
+    let prof = await Professeur.findOne({ email: email,mdp:mdp }).select('-matiere').select('-mdp');
+    if(prof){
+      const payload = {
+        prof: {
+          id: prof._id,
+        },
+      };
+      const token = await new Promise((resolve, reject) => {
+        jwt.sign(payload, config.secret, { expiresIn: 3600 }, (err, token) => {
+          if (err) reject(err);
+          console.log("Access TOKEN :", token);
+          resolve(token); // Résoudre la promesse avec le token
+        });
       });
+      return {prof,token}
     }
     
-    const payload = {
-      prof: {
-        id: prof.idProf,
-      },
-    };
-
-    jwt.sign(
-      payload,
-      config.secret,
-      { expiresIn: 3600 },
-      (err, token) => {
-        if (err) throw err;
-        console.log("Access TOKEN :", token);
-        res.json({ token });
-      }
-    );
     return prof;
   } catch (err) {
     res.status(500).json({
       status: 500,
-      message: "Erreur serveur.",
+      message: "Erreur serveur." +err.message,
     });
   }
 };
@@ -224,3 +217,82 @@ exports.insertionAssignementMatiere = async (idProf,idMatiere,dateRendu,nomAss,d
     });
   }
 };
+
+
+// get liste prof
+exports.getAllProf = async (page,pageNumber,res) => {
+  try {
+    pageNumber = pageNumber || 2;
+    page = page || 0;
+    let data = await Professeur.find();
+    const total = data.length;
+    let totalPage = Math.floor(Number(total) / pageNumber);
+    if (Number(total) % pageNumber != 0) {
+      totalPage = totalPage + 1;
+    }
+    return {
+      totalPage : totalPage,
+      page:page,
+      pageNumber : pageNumber,
+      data : await Professeur.find().select('-matiere').select('-mdp').skip(Number(page)*pageNumber).limit(Number(pageNumber))
+    }
+  } catch (err) {
+    res.status(400).json({
+      status: 500,
+      message: err.message,
+    });
+  }
+};
+
+
+// create prof
+exports.createProf = async (prof , res) => {
+  try {
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const onlySpaces =/^\s*$/;
+    prof.idProf = Math.floor(Math.random() * (1000)) + 7;
+    if(!prof.email){
+      throw new Error("Entrez un email");
+    }else if(!regexEmail.test(prof.email)){
+      throw new Error("Veuillez saisir un email valide");
+    }
+    if(!prof.nom){
+      throw new Error("Entrez un nom");
+    }else if(prof.nom.match(onlySpaces) ){
+      throw new Error("Le nom n'est pas valide");
+    }
+    prof.mdp = "mot de passe";
+    let data = await Professeur.create(prof);
+    return data;
+  } catch (err) {
+    res.status(400).json({
+      status: 500,
+      message: err.message,
+    });
+  }
+}
+
+exports.updateProf = async (idProf ,prof , res) => {
+  try {
+  const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const onlySpaces =/^\s*$/;
+    prof.idProf = Math.floor(Math.random() * (1000)) + 7;
+    if(prof.email && !regexEmail.test(prof.email)){
+      throw new Error("Veuillez saisir un email valide");
+    }
+    if(prof.nom && prof.nom.match(onlySpaces) ){
+      throw new Error("Le nom n'est pas valide");
+    }
+    let data = await Professeur.findOneAndUpdate({ _id: ObjectID(idProf) }, prof, {
+      new: true,
+      runValidators: true,
+    });
+    return data;
+  } catch (err) {
+    res.status(400).json({
+      status: 500,
+      message: err.message,
+    });
+  }
+}
+

@@ -41,3 +41,50 @@ exports.insertionAssignementMatiere = async (req, res) => {
     .catch();
 };
 
+exports.getAllProf = async (req, res) => {
+  try {
+    let data = await professeurRepository.getAllProf(
+      req.query.page,
+      req.query.pageNumber,
+      res
+    );
+    res.status(200).json({
+      status: 200,
+      data: data,
+    });
+  } catch (err) {}
+};
+
+exports.createProf  = async (req, res) => {
+  try {
+    let data = await professeurRepository.createProf(
+      {
+        email : req.body.email,
+        nom : req.body.nom,
+        mdp : req.body.mdp,
+        photo : req.body.photo
+      },
+      res
+    );
+    res.status(200).json({
+      status: 200,
+      data: data,
+    });
+  } catch (err) {}
+};
+
+exports.updateProf  = async (req, res) => {
+  try {
+    let data = await professeurRepository.updateProf( req.params.idProf,
+      {
+        email : req.body.email,
+        nom : req.body.nom
+      },
+      res
+    );
+    res.status(200).json({
+      status: 200,
+      data: data,
+    });
+  } catch (err) {}
+};
