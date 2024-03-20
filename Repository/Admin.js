@@ -17,34 +17,28 @@ exports.getAdmin = async (res) => {
 exports.login = async (email, mdp, res) => {
   try {
     let admin = await Admin.findOne({ email: email,mdp:mdp });
-    if (!admin) {
-      return res.status(404).json({
-        status: 404,
-        message: "Identifiant non trouvé!",
-      });
-    }
     
-    const payload = {
-      admin: {
-        id: admin.idAdmin,
-      },
-    };
-
-    jwt.sign(
-      payload,
-      config.secret,
-      { expiresIn: 3600 },
-      (err, token) => {
-        if (err) throw err;
-        console.log("Access TOKEN :", token);
-        res.json({ token });
-      }
-    );
+    if(admin){
+      const payload = {
+        admin: {
+          id: admin.idAdmin,
+        },
+      };
+  
+      let token = await new Promise((resolve, reject) => {
+        jwt.sign(payload, config.secret, { expiresIn: 3600 }, (err, token) => {
+          if (err) reject(err);
+          console.log("Access TOKEN :", token);
+          resolve(token); // Résoudre la promesse avec le token
+        });
+      });
+      return {admin,token};
+    }
     return admin;
   } catch (err) {
     res.status(500).json({
       status: 500,
-      message: "Erreur serveur.",
+      message: "Erreur serveur: "+err.message,
     });
   }
 };

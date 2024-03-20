@@ -9,17 +9,18 @@ exports.login = async (req, res) => {
       } else{
         const prof = await Professeur.login(req.body.email, req.body.mdp, res);
         if (prof) {
-          res.status(200).json({ type_user: "professeur", utilisateur: prof });
+          res.status(200).json({ type_user: "professeur", utilisateur: prof.prof , token : prof.token});
         } else {
           const etudiant = await Eleve.login(
             req.body.email,
             req.body.mdp,
             res
           );
+          console.log("etudiant",etudiant);
           if (etudiant) {
             res
               .status(200)
-              .json({ type_user: "etudiant", utilisateur: etudiant });
+              .json({ type_user: "etudiant", utilisateur: etudiant.eleve , token : etudiant.token});
           } else {
               const admin = await Admin.login(
                   req.body.email,
@@ -29,7 +30,7 @@ exports.login = async (req, res) => {
                 if (admin) {
                   res
                     .status(200)
-                    .json({ type_user: "admin", utilisateur: admin });
+                    .json({ type_user: "admin", utilisateur: admin.admin, token : admin.token });
                 } else {
                   res.status(400).json({
                     status: 400,
@@ -39,5 +40,7 @@ exports.login = async (req, res) => {
           }
         }
       }
-    } catch (err) {}
+    } catch (err) {
+      console.log(err.message);
+    }
   };
