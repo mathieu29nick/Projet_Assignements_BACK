@@ -12,5 +12,6 @@ router.put('/matiere/:idProf', professeurControlleur.insertMatiere);
 router.get('/professeurs', professeurControlleur.getAllProf);
 router.put('/:idProf', professeurControlleur.updateProf);
 router.post('/', professeurControlleur.createProf);
+router.get('/assignements',professeurControlleur.listeAssignementProf)
 
 module.exports = router;

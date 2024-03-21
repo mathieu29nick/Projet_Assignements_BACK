@@ -6,17 +6,19 @@ exports.getProfesseur = async (req, res) => {
       status: 200,
       data: await professeurRepository.getProfesseur(),
     });
-  } catch (err) {}
+  }
+  catch (err) {}
 };
 
-exports.listeMatiereProf = async ( req, res ) => {
+exports.listeMatiereProf = async (req, res) => {
   try {
     res.status(200).json({
       status: 200,
       data: await professeurRepository.listeMatiereProf(req.query.idProf, res),
     });
-  } catch (err) {}
-}
+  }
+  catch (err) {}
+};
 exports.listeMatiere = async (req, res) => {
   try {
     let posts = await professeurRepository.listeMatiere(req.query.page, req.query.pageNumber, res);
@@ -24,20 +26,21 @@ exports.listeMatiere = async (req, res) => {
       status: 200,
       data: posts,
     });
-  } catch (err) {}
+  }
+  catch (err) {}
 };
 
 exports.insertMatiere = async (req, res) => {
   professeurRepository
-    .insertionMatiere(req.params.idProf,req.body.libelle,req.body.idNiveau,req.body.photo,res)
-    .then((result) => res.status(200).json({ result }))
+    .insertionMatiere(req.params.idProf, req.body.libelle, req.body.idNiveau, req.body.photo, res)
+    .then((result) => res.status(200).json({result}))
     .catch();
 };
 
 exports.insertionAssignementMatiere = async (req, res) => {
   professeurRepository
-    .insertionAssignementMatiere(req.params.idMatiere,req.body.dateRendu,req.body.nomAssignement,req.body.description,res)
-    .then((result) => res.status(200).json({ result }))
+    .insertionAssignementMatiere(req.params.idMatiere, req.body.dateRendu, req.body.nomAssignement, req.body.description, res)
+    .then((result) => res.status(200).json({result}))
     .catch();
 };
 
@@ -45,54 +48,66 @@ exports.getOneAssignementModifierNote = async (req, res) => {
   try {
     res.status(200).json({
       status: 200,
-      data: await professeurRepository.getOneAssignementModifierNote(req.params.idAss,req.params.idEleve,req.body.note,req.body.remarque,res),
+      data: await professeurRepository.getOneAssignementModifierNote(req.params.idAss, req.params.idEleve, req.body.note, req.body.remarque, res),
     });
-  } catch (err) {}
+  }
+  catch (err) {}
 };
 exports.getAllProf = async (req, res) => {
   try {
-    let data = await professeurRepository.getAllProf(
-      req.query.page,
-      req.query.pageNumber,
-      res
-    );
+    let data = await professeurRepository.getAllProf(req.query.page, req.query.pageNumber, res);
     res.status(200).json({
       status: 200,
       data: data,
     });
-  } catch (err) {}
+  }
+  catch (err) {}
 };
 
-exports.createProf  = async (req, res) => {
+exports.createProf = async (req, res) => {
   try {
     let data = await professeurRepository.createProf(
       {
-        email : req.body.email,
-        nom : req.body.nom,
-        mdp : req.body.mdp,
-        photo : req.body.photo
+        email: req.body.email,
+        nom: req.body.nom,
+        mdp: req.body.mdp,
+        photo: req.body.photo,
       },
-      res
+      res,
     );
     res.status(200).json({
       status: 200,
       data: data,
     });
-  } catch (err) {}
+  }
+  catch (err) {}
 };
 
-exports.updateProf  = async (req, res) => {
+exports.updateProf = async (req, res) => {
   try {
-    let data = await professeurRepository.updateProf( req.params.idProf,
+    let data = await professeurRepository.updateProf(
+      req.params.idProf,
       {
-        email : req.body.email,
-        nom : req.body.nom
+        email: req.body.email,
+        nom: req.body.nom,
       },
-      res
+      res,
     );
     res.status(200).json({
       status: 200,
       data: data,
     });
-  } catch (err) {}
+  }
+  catch (err) {}
+};
+
+exports.listeAssignementProf = async (req, res) => {
+  try {
+    let data = await professeurRepository.listeAssignementProf(req.query.idProf, req.query.matiere, req.query.page, req.query.pageNumber, res);
+    res.status(200).json({
+      status: 200,
+      data: data,
+    });
+  }
+  catch (err) {}
 };

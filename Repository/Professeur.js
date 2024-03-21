@@ -401,3 +401,79 @@ exports.updateProf = async (idProf ,prof , res) => {
   }
 }
 
+
+// Liste assignement avec option tri avec les matieres d’un prof
+exports.listeAssignementProf = async (idProf, matiere, page , pageNumber, res) =>{
+  try{
+    pageNumber = Number(pageNumber) || 2;
+    page = Number(page) || 0;
+    const match = {
+      _id: ObjectID(idProf),
+      ...(matiere && { "matiere._id": ObjectID(matiere) }),
+     };
+    const propreties = [ {
+      $unwind: "$matiere"
+    },
+    {
+      $match: match
+    },
+    { 
+      $unwind: "$matiere.assignements" 
+    }]
+     let data = await Professeur.aggregate(propreties);
+    const total = data.length;
+    console.log(data,"data", Math.floor(Number(total) / pageNumber));
+    let totalPage = Math.floor(Number(total) / pageNumber);
+    if (Number(total) % pageNumber != 0) {
+      totalPage = totalPage + 1;
+    }
+  const assignement = await Professeur.aggregate([
+   ...propreties,
+    { 
+      $addFields: { 
+        "matiere.assignements.matiere": "$matiere.libelle" ,
+        "matiere.assignements.niveau": "$matiere.idNiveau" 
+      } 
+    },
+    {
+      $replaceRoot: { newRoot: "$matiere.assignements" }
+    },
+    {
+      $lookup: {
+        from: "Niveau", 
+        localField: "niveau",
+        foreignField: "idNiveau",
+        as: "niveau"
+      }
+    }, {
+      $addFields: {
+        niveau: { $arrayElemAt: ["$niveau.libelle", 0] }
+      }
+    },
+    {
+      $skip: page * pageNumber 
+    },
+    {
+      $limit: pageNumber 
+    },
+    {
+      $project: {
+        detailAssignementEleve: 0, 
+      }
+    }
+  ]);
+   return {
+    totalPage : totalPage,
+    page:page,
+    pageNumber : pageNumber,
+    data : assignement
+  }
+  }catch (err) {
+    res.status(400).json({
+      status: 500,
+      message: err.message,
+    });
+  }
+} 
+
+
