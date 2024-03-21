@@ -24,3 +24,12 @@ exports.getListeDetailAssignement = async (req, res) => {
     });
   } catch (err) {}
 };
+
+exports.getOneAssignementEleve = async (req, res) => {
+  try {
+    res.status(200).json({
+      status: 200,
+      data: await eleveRepository.getOneAssignementEleve(req.query.idAssignement,req.query.idEleve,res),
+    });
+  } catch (err) {}
+};

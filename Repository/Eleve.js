@@ -88,6 +88,7 @@ exports.getListeDetailAssignement = async (idEleve,idMatiere,idNiveau,orderdateR
           "matiere.assignements.detailAssignementEleve.assignement" : "$matiere.assignements.nomAssignement",
           "matiere.assignements.detailAssignementEleve.niveau" : "$matiere.idNiveau",
           "matiere.assignements.detailAssignementEleve.idNiveau" : "$matiere.idNiveau",
+          "matiere.assignements.detailAssignementEleve.idAssignement": "$matiere.assignements._id" 
         }
       },
       {
@@ -190,3 +191,70 @@ exports.getListeDetailAssignement = async (idEleve,idMatiere,idNiveau,orderdateR
     });
   }
 };
+
+
+// Fiche devoir Eleve
+exports.getOneAssignementEleve = async (idAssignement, idEleve , res) => {
+  try{
+    return await Professeur.aggregate([{
+      $unwind: "$matiere"
+    },
+    { 
+      $unwind: "$matiere.assignements" 
+    },
+    {
+      $match: { "matiere.assignements._id" : ObjectID(idAssignement) }
+    },
+    { 
+      $unwind: "$matiere.assignements.detailAssignementEleve" 
+    },
+    { 
+      $addFields: { 
+        "matiere.assignements.detailAssignementEleve.matiere": "$matiere.libelle" ,
+        "matiere.assignements.detailAssignementEleve.niveau": "$matiere.idNiveau",
+        "matiere.assignements.detailAssignementEleve.assignement": "$matiere.assignements.nomAssignement",
+        "matiere.assignements.detailAssignementEleve.dateRendu": "$matiere.assignements.dateRendu",
+        "matiere.assignements.detailAssignementEleve.idAssignement": "$matiere.assignements._id"  
+      } 
+    },
+    {
+      $replaceRoot: { newRoot: "$matiere.assignements.detailAssignementEleve" }
+    },
+    {
+      $match: { "idEleve" : ObjectID(idEleve) }
+    },
+    {
+      $lookup: {
+        from: "Niveau", 
+        localField: "niveau",
+        foreignField: "idNiveau",
+        as: "niveau"
+      }
+    },
+    {
+      $lookup: {
+        from: "Eleve", 
+        localField: "idEleve",
+        foreignField: "_id",
+        as: "eleve"
+      }
+    },{
+      $addFields: {
+        eleve: {
+          $concat: [
+            { $arrayElemAt: ["$eleve.nom", 0] }," ",
+            { $toString: { $arrayElemAt: ["$eleve.prenom", 0] } },
+          ]
+        },
+        niveau : {$arrayElemAt: ["$niveau.libelle", 0]}
+      }
+    }])
+
+  }catch (err) {
+    res.status(400).json({
+      status: 500,
+      message: err.message,
+    });
+  }
+}
+
