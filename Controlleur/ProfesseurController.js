@@ -122,3 +122,14 @@ exports.getOneAssignement = async (req,res) => {
   }
   catch (err) {}
 }
+
+exports.validationDevoirRendu = async (req,res) => {
+  try {
+    let data = await professeurRepository.validationDevoirRendu(req.params.idAssignement,req.params.idEleve, res);
+    res.status(200).json({
+      status: 200,
+      data: data,
+    });
+  }
+  catch (err) {}
+}
