@@ -240,7 +240,7 @@ exports.getOneAssignementModifierNote = async (idAss, idEleve,note,remarque,res)
       "matiere.assignements": {
         $elemMatch: {
           _id: ObjectID(idAss),
-          "detailAssignementEleve.idEleve": Number(idEleve)
+          "detailAssignementEleve.idEleve": ObjectID(idEleve)
         }
       }
     }, {
@@ -253,7 +253,7 @@ exports.getOneAssignementModifierNote = async (idAss, idEleve,note,remarque,res)
       if (matiere.assignements && matiere.assignements.length > 0) {
         let assignements = matiere.assignements.filter(ass => ass._id.toString() === idAss);
         if (assignements.length > 0 && assignements[0].detailAssignementEleve && assignements[0].detailAssignementEleve.length > 0) {
-          assignement = assignements[0].detailAssignementEleve.find(eleve => eleve.idEleve === Number(idEleve));
+          assignement = assignements[0].detailAssignementEleve.find(eleve => eleve.idEleve === ObjectID(idEleve));
           if (assignement) {
             const eleveData = await eleveRepository.getOneEleve(assignement.idEleve);
             if (eleveData) {
@@ -284,7 +284,7 @@ exports.getOneAssignementModifierNote = async (idAss, idEleve,note,remarque,res)
         "matiere.assignements": {
           $elemMatch: {
             _id: ObjectID(idAss),
-            "detailAssignementEleve.idEleve": Number(idEleve)
+            "detailAssignementEleve.idEleve": ObjectID(idEleve)
           }
         }
       },
@@ -298,7 +298,7 @@ exports.getOneAssignementModifierNote = async (idAss, idEleve,note,remarque,res)
         arrayFilters: [
           { "elem._id": ObjectID("65f9df48a74d8df8ff3738a2") },
           { "assign._id": ObjectID(idAss) },
-          { "detail.idEleve": Number(idEleve) }
+          { "detail.idEleve": ObjectID(idEleve) }
         ],
         new: true
       }
@@ -517,4 +517,3 @@ exports.getOneAssignement = async(idAssignement, res) => {
     });
   }
 }
-
