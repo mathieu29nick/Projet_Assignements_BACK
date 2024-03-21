@@ -111,3 +111,14 @@ exports.listeAssignementProf = async (req, res) => {
   }
   catch (err) {}
 };
+
+exports.getOneAssignement = async (req,res) => {
+  try {
+    let data = await professeurRepository.getOneAssignement(req.query.idAssignement, res);
+    res.status(200).json({
+      status: 200,
+      data: data,
+    });
+  }
+  catch (err) {}
+}

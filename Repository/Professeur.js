@@ -422,7 +422,6 @@ exports.listeAssignementProf = async (idProf, matiere, page , pageNumber, res) =
     }]
      let data = await Professeur.aggregate(propreties);
     const total = data.length;
-    console.log(data,"data", Math.floor(Number(total) / pageNumber));
     let totalPage = Math.floor(Number(total) / pageNumber);
     if (Number(total) % pageNumber != 0) {
       totalPage = totalPage + 1;
@@ -476,4 +475,46 @@ exports.listeAssignementProf = async (idProf, matiere, page , pageNumber, res) =
   }
 } 
 
+// Fiche assignement
+exports.getOneAssignement = async(idAssignement, res) => {
+  try{
+    return await Professeur.aggregate([{
+      $unwind: "$matiere"
+    },
+    { 
+      $unwind: "$matiere.assignements" 
+    },
+    {
+      $match: { "matiere.assignements._id" : ObjectID(idAssignement) }
+    },
+    { 
+      $addFields: { 
+        "matiere.assignements.matiere": "$matiere.libelle" ,
+        "matiere.assignements.niveau": "$matiere.idNiveau",
+        "matiere.assignements.detailAssignementEleve": { $size: "$matiere.assignements.detailAssignementEleve" }
+      } 
+    },
+    {
+      $replaceRoot: { newRoot: "$matiere.assignements" }
+    },
+    {
+      $lookup: {
+        from: "Niveau", 
+        localField: "niveau",
+        foreignField: "idNiveau",
+        as: "niveau"
+      }
+    }, {
+      $addFields: {
+        niveau: { $arrayElemAt: ["$niveau.libelle", 0] }
+      }
+    }])
+
+  }catch (err) {
+    res.status(400).json({
+      status: 500,
+      message: err.message,
+    });
+  }
+}
 

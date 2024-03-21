@@ -13,5 +13,6 @@ router.get('/professeurs', professeurControlleur.getAllProf);
 router.put('/:idProf', professeurControlleur.updateProf);
 router.post('/', professeurControlleur.createProf);
 router.get('/assignements',professeurControlleur.listeAssignementProf)
+router.get('/assignements/assignement',professeurControlleur.getOneAssignement)
 
 module.exports = router;
