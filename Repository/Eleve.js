@@ -258,3 +258,44 @@ exports.getOneAssignementEleve = async (idAssignement, idEleve , res) => {
   }
 }
 
+
+// rendre devoir
+exports.rendreDevoir = async (idAssignement, idEleve, res) => {
+  try {
+    const ajd = new Date();
+    const filter = {
+      "matiere.assignements._id": ObjectID(idAssignement),
+      "matiere.assignements.dateRendu": { $gte: ajd },
+      "matiere.assignements.detailAssignementEleve.idEleve": ObjectID(idEleve),
+      "matiere.assignements.detailAssignementEleve.rendu": false
+    };
+    const update = {
+      $set: {
+        "matiere.$[].assignements.$[inner].detailAssignementEleve.$[elem].rendu": false,
+        "matiere.$[].assignements.$[inner].detailAssignementEleve.$[elem].dateRenduEleve": ajd
+      }
+    };
+    
+    const options = {
+      arrayFilters: [
+        { "inner._id": ObjectID(idAssignement) , "inner.dateRendu": { $gte: ajd } },
+        { "elem.idEleve": ObjectID(idEleve),"elem.rendu": false },
+      ]
+    };
+    const professeur = await Professeur.updateOne(filter, update, options);
+
+    if (!professeur || professeur.modifiedCount === 0) {
+     return res.status(400).json({
+        status: 400,
+        message: "Le délai de rendu du devoir a été dépassé ou le devoir a déjà été rendu et validé.",
+      });
+    }
+
+    return professeur;
+  }catch (err) {
+    res.status(400).json({
+      status: 500,
+      message: err.message,
+    });
+  }
+}

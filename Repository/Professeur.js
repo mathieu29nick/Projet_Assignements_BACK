@@ -519,40 +519,29 @@ exports.getOneAssignement = async(idAssignement, res) => {
 }
 
 // validation devoir rendu
-exports.validationDevoirRendu = async (idAssignement,idEleve, res) => {
+exports.validationDevoirRendu = async (idAssignement, idEleve, res) => {
   try {
-    // Utiliser la méthode updateOne pour mettre à jour la valeur de rendu
-    const professeur = await Professeur.aggregate([
-      {
-        $unwind: "$matiere"
-      },
-      {
-        $unwind: "$matiere.assignements"
-      },
-      {
-        $match: {
-          "matiere.assignements._id": ObjectID(idAssignement),
-        }
-      },
-      {
-        $unwind: "$matiere.assignements.detailAssignementEleve"
-      },
-      { $match: {
-          "matiere.assignements.detailAssignementEleve.idEleve": ObjectID(idEleve),
-          "matiere.assignements.statut": true, 
-          "matiere.assignements.detailAssignementEleve.dateRenduEleve": { $ne: null } 
-        }
-      },
-      {
-        $set: {
-          "matiere.assignements.detailAssignementEleve.rendu": true
-        }
+    const filter = {
+      "matiere.assignements._id": ObjectID(idAssignement),
+      "matiere.assignements.detailAssignementEleve.idEleve": ObjectID(idEleve)
+    };
+    const update = {
+      $set: {
+        "matiere.$[].assignements.$[inner].detailAssignementEleve.$[elem].rendu": true
       }
-    ]);
+    };
+    
+    const options = {
+      arrayFilters: [
+        { "inner._id": ObjectID(idAssignement) },
+        { "elem.idEleve": ObjectID(idEleve),"elem.dateRenduEleve": { $ne: null } },
+      ]
+    };
+    const professeur = await Professeur.updateOne(filter, update, options);
 
-    if (!professeur || professeur.length === 0) {
+    if (!professeur || professeur.modifiedCount === 0) {
      return res.status(400).json({
-        status: 500,
+        status: 400,
         message: "Vous ne pouvez pas effectuer cette action. Veuillez vérifier les conditions.",
       });
     }

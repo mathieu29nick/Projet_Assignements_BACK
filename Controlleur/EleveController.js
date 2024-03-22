@@ -33,3 +33,12 @@ exports.getOneAssignementEleve = async (req, res) => {
     });
   } catch (err) {}
 };
+
+exports.rendreDevoir = async (req, res) => {
+  try {
+    res.status(200).json({
+      status: 200,
+      data: await eleveRepository.rendreDevoir(req.params.idAssignement,req.params.idEleve,res),
+    });
+  } catch (err) {}
+};
