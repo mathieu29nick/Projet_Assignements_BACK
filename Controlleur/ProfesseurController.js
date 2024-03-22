@@ -133,3 +133,14 @@ exports.validationDevoirRendu = async (req,res) => {
   }
   catch (err) {}
 }
+
+exports.acheverAssignement = async (req,res) => {
+  try {
+    let data = await professeurRepository.acheverAssignement(req.params.idAssignement, res);
+    res.status(200).json({
+      status: 200,
+      data: data,
+    });
+  }
+  catch (err) {}
+}

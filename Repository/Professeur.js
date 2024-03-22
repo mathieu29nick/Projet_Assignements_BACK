@@ -554,3 +554,40 @@ exports.validationDevoirRendu = async (idAssignement, idEleve, res) => {
     });
   }
 }
+
+// achever assignement
+exports.acheverAssignement = async (idAssignement, res) => {
+  try {
+    const ajd = new Date();
+    const filter = {
+      "matiere.assignements._id": ObjectID(idAssignement),
+      "matiere.assignements.dateRendu": { $lt: ajd },
+    };
+    const update = {
+      $set: {
+        "matiere.$[].assignements.$[inner].statut": true
+      }
+    };
+    
+    const options = {
+      arrayFilters: [
+        { "inner._id": ObjectID(idAssignement),"inner.dateRendu": { $lt: ajd } }
+      ]
+    };
+    const professeur = await Professeur.updateOne(filter, update, options);
+
+    if (!professeur || professeur.modifiedCount === 0) {
+     return res.status(400).json({
+        status: 400,
+        message: "Vous ne pouvez pas effectuer cette action car la date limite de rendu du devoir n'a pas encore été dépassée.",
+      });
+    }
+
+    return professeur;
+  }catch (err) {
+    res.status(400).json({
+      status: 500,
+      message: err.message,
+    });
+  }
+}

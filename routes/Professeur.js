@@ -15,5 +15,5 @@ router.post('/', professeurControlleur.createProf);
 router.get('/assignements',professeurControlleur.listeAssignementProf)
 router.get('/assignements/assignement',professeurControlleur.getOneAssignement)
 router.put('/assignement/eleve/validation/:idAssignement/:idEleve',professeurControlleur.validationDevoirRendu)
-
+router.put('/acheveAssignement/:idAssignement',professeurControlleur.acheverAssignement)
 module.exports = router;
