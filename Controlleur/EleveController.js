@@ -41,6 +41,8 @@ exports.rendreDevoir = async (req, res) => {
       data: await eleveRepository.rendreDevoir(req.params.idAssignement,req.params.idEleve,res),
     });
   } catch (err) {}
+}
+
 exports.setRendreDetailAssignementEleve = async (req, res) => {
   eleveRepository
     .setRendreDetailAssignementEleve(req.params.idEleve,req.params.idAss, res)
