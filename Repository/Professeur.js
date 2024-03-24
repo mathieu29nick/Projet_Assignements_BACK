@@ -236,91 +236,57 @@ function generateRemarque(note) {
 //get 1 assignement à modifier
 exports.getOneAssignementModifierNote = async (idAss, idEleve,note,remarque,res) => {
   try {
-    let data = await Professeur.findOne({
-      "matiere.assignements": {
-        $elemMatch: {
-          _id: ObjectID(idAss),
-          "detailAssignementEleve.idEleve": ObjectID(idEleve)
+    const filter = {
+      "matiere.assignements._id": ObjectID(idAss),
+      "matiere.assignements.detailAssignementEleve.idEleve": ObjectID(idEleve),
+    };
+    var pipelineAss = [
+      { $unwind: "$matiere" },
+      { $unwind: "$matiere.assignements" },
+      { $unwind: "$matiere.assignements.detailAssignementEleve" },
+      {
+        $match: filter
+      },{
+        $replaceRoot : { 
+          newRoot : "$matiere.assignements.detailAssignementEleve"
         }
       }
-    }, {
-      "matiere.$": 1
-    });
-    
-    let assignement = null;
-    if (data && data.matiere && data.matiere.length > 0) {
-      let matiere = data.matiere[0];
-      if (matiere.assignements && matiere.assignements.length > 0) {
-        let assignements = matiere.assignements.filter(ass => ass._id.toString() === idAss);
-        if (assignements.length > 0 && assignements[0].detailAssignementEleve && assignements[0].detailAssignementEleve.length > 0) {
-          assignement = assignements[0].detailAssignementEleve.find(eleve => eleve.idEleve === ObjectID(idEleve));
-          if (assignement) {
-            const eleveData = await eleveRepository.getOneEleve(assignement.idEleve);
-            if (eleveData) {
-              assignement.nomEleve = eleveData.nom;
-              assignement.prenomEleve = eleveData.prenom;
-            }
-          }
-        }
-      }
-    }
-    
-    if(!assignement.rendu || assignement.dateRenduEleve==null || assignement.dateRendu==""){
-      return res.status(404).json({
-        status: 404,
-        message: "L'assignement n'est pas encore rendu par "+assignement.nomEleve+" "+assignement.prenomEleve+"!",
-      });
-    }
-   
-    if(note<0 || note>20){
-      return res.status(404).json({
-        status: 404,
-        message: "Veuillez entrer une note valide!!",
+    ];
+    let ass= await Professeur.aggregate(pipelineAss);
+    console.log(ass );
+    if(Number(note)<0 || Number(note)>20){
+      res.status(400).json({
+        status: 400,
+        message: "Saisissez une note valide!!"
       });
     }
 
-    const professeur = await Professeur.findOneAndUpdate(
-      {
-        "matiere.assignements": {
-          $elemMatch: {
-            _id: ObjectID(idAss),
-            "detailAssignementEleve.idEleve": ObjectID(idEleve)
-          }
-        }
-      },
-      {
-        $set: {
-          "matiere.$[elem].assignements.$[assign].detailAssignementEleve.$[detail].note":note,
-          "matiere.$[elem].assignements.$[assign].detailAssignementEleve.$[detail].remarque": generateRemarque(note)+remarque
-        }
-      },
-      {
-        arrayFilters: [
-          { "elem._id": ObjectID("65f9df48a74d8df8ff3738a2") },
-          { "assign._id": ObjectID(idAss) },
-          { "detail.idEleve": ObjectID(idEleve) }
-        ],
-        new: true
-      }
-    );
-
-    if (!professeur) {
-      return res.status(404).json({
-        status: 404,
-        message: "Assignement introuvable!",
+    if(!ass[0].rendu || ass[0].dateRenduEleve===null || ass[0].dateRenduEleve===""){
+      res.status(400).json({
+        status: 400,
+        message: "Cet assignement n'est pas encore rendu!!"
       });
     }
 
-    return res.status(200).json({
-      status: 200,
-      message: "Détails d'assignement modifiés avec succès.",
-    });
+    const opt = {
+      arrayFilters: [
+        { "inner._id": ObjectID(idAss)},
+        { "elem.idEleve": ObjectID(idEleve) },
+      ]
+    };
+    const update = {
+      $set: {
+        "matiere.$[].assignements.$[inner].detailAssignementEleve.$[elem].note": Number(note),
+        "matiere.$[].assignements.$[inner].detailAssignementEleve.$[elem].remarque": generateRemarque(note)+remarque
+      }
+    };
 
+    return await Professeur.updateOne(filter,update,opt);
   } catch (err) {
     res.status(500).json({
       status: 500,
       message: "Erreur serveur. " + err.message,
-    })
+    });
   }
 }
 

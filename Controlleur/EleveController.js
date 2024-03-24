@@ -43,9 +43,9 @@ exports.rendreDevoir = async (req, res) => {
   } catch (err) {}
 }
 
-exports.setRendreDetailAssignementEleve = async (req, res) => {
+exports.ficheDetailAssignementEleve = async (req, res) => {
   eleveRepository
-    .setRendreDetailAssignementEleve(req.params.idEleve,req.params.idAss, res)
+    .ficheDetailAssignementEleve(req.params.idEleve,req.params.idAss, res)
     .then((result) => res.status(200).json({ result }))
     .catch();
 };

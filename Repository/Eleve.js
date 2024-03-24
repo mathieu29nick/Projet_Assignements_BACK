@@ -300,36 +300,60 @@ exports.rendreDevoir = async (idAssignement, idEleve, res) => {
   }
 }
 //  Fiche assignement d'un élève avec bouton rendre l'assignement
-exports.setRendreDetailAssignementEleve = async (idEleve,idAss, res) => {
+exports.ficheDetailAssignementEleve = async (idEleve,idAss, res) => {
   try {
-    const data = await Professeur.findOneAndUpdate(
+    var pipeline = [
+      { $unwind: "$matiere" },
+      { $unwind: "$matiere.assignements" },
+      { $unwind: "$matiere.assignements.detailAssignementEleve" },
       {
-        "matiere.assignements": {
-          $elemMatch: {
-            _id: ObjectID(idAss),
-            "detailAssignementEleve.idEleve": ObjectID(idEleve)
-          }
+        $addFields: {
+          "matiere.assignements.detailAssignementEleve.matiere" : "$matiere.libelle",
+          "matiere.assignements.detailAssignementEleve.idMatiere" : "$matiere._id",
+          "matiere.assignements.detailAssignementEleve.assignement" : "$matiere.assignements.nomAssignement",
+          "matiere.assignements.detailAssignementEleve.niveau" : "$matiere.idNiveau",
+          "matiere.assignements.detailAssignementEleve.idNiveau" : "$matiere.idNiveau",
+          "matiere.assignements.detailAssignementEleve.idAssignement": "$matiere.assignements._id" 
         }
       },
       {
-        $set: {
-          "matiere.assignements.$[assign].detailAssignementEleve.$[detail].rendu": true,
-          "matiere.assignements.$[assign].detailAssignementEleve.$[detail].dateRendu": new Date()
+        $match: {
+          "matiere.assignements.detailAssignementEleve.idEleve": ObjectID(idEleve),
+          "matiere.assignements._id": ObjectID(idAss)
         }
-      },
-      {
-        arrayFilters: [
-          { "assign._id": ObjectID(idAss) },
-          { "detail.idEleve": ObjectID(idEleve) }
-        ],
-        new: true
+      },{
+        $replaceRoot : { 
+          newRoot : "$matiere.assignements.detailAssignementEleve"
+        }
+      },{
+        $lookup: {
+          from: "Eleve",
+          localField: "idEleve",
+          foreignField: "_id",
+          as: "eleve",
+        }
+      },{
+        $lookup: {
+          from: "Niveau",
+          localField: "niveau",
+          foreignField: "idNiveau",
+          as: "niveau",
+        }
+      },{
+        $addFields: {
+          eleve: {
+            $concat: [
+              { $arrayElemAt: ["$eleve.nom", 0] }," ",
+              { $toString: { $arrayElemAt: ["$eleve.prenom", 0] } },
+            ]
+          },
+          niveau : {$arrayElemAt: ["$niveau.libelle", 0]}
+        }
       }
-    );
-    return res.status(200).json({
-      status: 200,
-      data : data,
-      message: "Détails d'assignement modifiés avec succès.",
-    });
+    ];
+
+    const result = await Professeur.aggregate(pipeline);
+    return result;
   } catch (err) {
     res.status(400).json({
       status: 400,
