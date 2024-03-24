@@ -299,3 +299,41 @@ exports.rendreDevoir = async (idAssignement, idEleve, res) => {
     });
   }
 }
+//  Fiche assignement d'un élève avec bouton rendre l'assignement
+exports.setRendreDetailAssignementEleve = async (idEleve,idAss, res) => {
+  try {
+    const data = await Professeur.findOneAndUpdate(
+      {
+        "matiere.assignements": {
+          $elemMatch: {
+            _id: ObjectID(idAss),
+            "detailAssignementEleve.idEleve": ObjectID(idEleve)
+          }
+        }
+      },
+      {
+        $set: {
+          "matiere.assignements.$[assign].detailAssignementEleve.$[detail].rendu": true,
+          "matiere.assignements.$[assign].detailAssignementEleve.$[detail].dateRendu": new Date()
+        }
+      },
+      {
+        arrayFilters: [
+          { "assign._id": ObjectID(idAss) },
+          { "detail.idEleve": ObjectID(idEleve) }
+        ],
+        new: true
+      }
+    );
+    return res.status(200).json({
+      status: 200,
+      data : data,
+      message: "Détails d'assignement modifiés avec succès.",
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 400,
+      message: err.message,
+    });
+  }
+};
