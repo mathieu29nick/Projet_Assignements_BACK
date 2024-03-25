@@ -144,3 +144,15 @@ exports.acheverAssignement = async (req,res) => {
   }
   catch (err) {}
 }
+
+exports.getListeDetailAssignementEleve = async (req, res) => {
+  try {
+    //idProf,idMatiere,idNiveau,orderdateRendu,etat, page, pageNumber, res
+    let data = await professeurRepository.getListeDetailAssignementEleve(req.query.idProf, req.query.idMatiere,req.query.idNiveau,req.query.orderdateRendu,req.query.etat, req.query.page, req.query.pageNumber, res);
+    res.status(200).json({
+      status: 200,
+      data: data,
+    });
+  }
+  catch (err) {}
+};

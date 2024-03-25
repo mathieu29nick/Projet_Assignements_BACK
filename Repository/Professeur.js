@@ -557,3 +557,124 @@ exports.acheverAssignement = async (idAssignement, res) => {
     });
   }
 }
+
+// Liste detail assignement des étudiants
+exports.getListeDetailAssignementEleve = async (idProf,idMatiere,idNiveau,orderdateRendu,etat, page, pageNumber, res) => {
+  try {
+    pageNumber = pageNumber || 2;
+    page = page || 0;
+    if (!pageNumber) pageNumber = 20;
+
+    var pipeline = [
+      { $unwind: "$matiere" },
+      { $unwind: "$matiere.assignements" },
+      { $unwind: "$matiere.assignements.detailAssignementEleve" },
+      {
+        $addFields: {
+          "matiere.assignements.detailAssignementEleve.matiere" : "$matiere.libelle",
+          "matiere.assignements.detailAssignementEleve.idMatiere" : "$matiere._id",
+          "matiere.assignements.detailAssignementEleve.assignement" : "$matiere.assignements.nomAssignement",
+          "matiere.assignements.detailAssignementEleve.niveau" : "$matiere.idNiveau",
+          "matiere.assignements.detailAssignementEleve.idNiveau" : "$matiere.idNiveau",
+          "matiere.assignements.detailAssignementEleve.idAssignement": "$matiere.assignements._id" 
+        }
+      },
+      {
+        $match: {
+          "_id": ObjectID(idProf)
+        }
+      },{
+        $replaceRoot : { 
+          newRoot : "$matiere.assignements.detailAssignementEleve"
+        }
+      },{
+        $lookup: {
+          from: "Eleve",
+          localField: "idEleve",
+          foreignField: "_id",
+          as: "eleve",
+        }
+      },{
+        $lookup: {
+          from: "Niveau",
+          localField: "niveau",
+          foreignField: "idNiveau",
+          as: "niveau",
+        }
+      },{
+        $addFields: {
+          eleve: {
+            $concat: [
+              { $arrayElemAt: ["$eleve.nom", 0] }," ",
+              { $toString: { $arrayElemAt: ["$eleve.prenom", 0] } },
+            ]
+          },
+          niveau : {$arrayElemAt: ["$niveau.libelle", 0]}
+        }
+      }
+    ];
+
+    const result = await Professeur.aggregate(pipeline);
+  
+    const total = result.length;
+    let totalPage = Math.floor(Number(total) / pageNumber);
+    if (Number(total) % pageNumber != 0) {
+      totalPage = totalPage + 1;
+    }
+
+    var newpipeline = [
+      { $skip: Number(page * pageNumber) },
+      { $limit: Number(pageNumber) }
+    ];
+    
+    var tripipeline = [];
+
+    if(idMatiere && (idMatiere!=="" || idMatiere!==null)){
+      tripipeline.push({
+        $match: {
+        "idMatiere": ObjectID(idMatiere)
+        }
+      });
+    }
+    
+    if(orderdateRendu && (orderdateRendu!=="" || orderdateRendu!==null)){
+      tripipeline.push({
+        $sort: {
+        "dateRenduEleve": Number(orderdateRendu)
+        }
+      });
+    }
+    
+    if( idNiveau && (idNiveau!=="" || idNiveau!==null)){
+      tripipeline.push({
+        $match: {
+        "idNiveau": Number(idNiveau)
+        }
+      });
+    }
+
+    // 0 : rendu , 1 non rendu par l'élève
+    if( etat && (etat!=="" || etat!==null)){
+      console.log(etat)
+      tripipeline.push({
+        $match: {
+        "dateRenduEleve": Number(etat) === 0 ? { $ne: null } : null
+        }
+      });
+    }
+
+    const data = await Professeur.aggregate([...pipeline, ...tripipeline,...newpipeline]);
+
+    return {
+      liste: data,
+      page: page,
+      pageNumber: pageNumber,
+      totalPage: totalPage,
+    };
+  } catch (err) {
+    res.status(400).json({
+      status: 400,
+      message: err.message,
+    });
+  }
+};
