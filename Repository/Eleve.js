@@ -361,3 +361,108 @@ exports.ficheDetailAssignementEleve = async (idEleve,idAss, res) => {
     });
   }
 };
+
+
+// Performance d’un eleve dans un matiere / dans un niveau
+exports.getPerformanceOneEleve = async (idEleve,idMatiere,idNiveau,order,res) => {
+  try {
+    let filter={
+      "matiere.assignements.detailAssignementEleve.idEleve": ObjectID(idEleve)
+    };
+    let filterGroupBy={}
+    let filterOrder={}
+
+    // filtre % au Niveau
+    if(idNiveau){
+      filter["matiere.idNiveau"] = Number(idNiveau);
+      filterGroupBy["_id"] = "$matiere";
+      filterGroupBy["moyenne"] ={ $avg: { $ifNull: ["$note", 0] } };
+
+    }else{
+      filterGroupBy["_id"] = "$niveau";
+      filterGroupBy["moyenne"] ={ $avg: { $ifNull: ["$note", 0] } };
+    }
+
+    // filtre % à une Matiere
+    if(idMatiere){
+      filter["matiere._id"] = ObjectID(idMatiere);
+      filterGroupBy["_id"] = "$assignement";
+      filterGroupBy["moyenne"] ={ $avg: { $ifNull: ["$note", 0] } } ;
+
+    }else{
+      filterGroupBy["_id"] = "$matiere";
+      filterGroupBy["moyenne"] = { $avg: { $ifNull: ["$note", 0] } } ;
+    }
+
+    var pipeline = [
+      { $unwind: "$matiere" },
+      { $unwind: "$matiere.assignements" },
+      { $unwind: "$matiere.assignements.detailAssignementEleve" },
+      {
+        $addFields: {
+          "matiere.assignements.detailAssignementEleve.matiere" : "$matiere.libelle",
+          "matiere.assignements.detailAssignementEleve.idMatiere" : "$matiere._id",
+          "matiere.assignements.detailAssignementEleve.assignement" : "$matiere.assignements.nomAssignement",
+          "matiere.assignements.detailAssignementEleve.niveau" : "$matiere.idNiveau",
+          "matiere.assignements.detailAssignementEleve.idNiveau" : "$matiere.idNiveau",
+          "matiere.assignements.detailAssignementEleve.idAssignement": "$matiere.assignements._id" 
+        }
+      },
+      {
+        $match: filter
+      },{
+        $replaceRoot : { 
+          newRoot : "$matiere.assignements.detailAssignementEleve"
+        }
+      },{
+        $lookup: {
+          from: "Eleve",
+          localField: "idEleve",
+          foreignField: "_id",
+          as: "eleve",
+        }
+      },{
+        $lookup: {
+          from: "Niveau",
+          localField: "niveau",
+          foreignField: "idNiveau",
+          as: "niveau",
+        }
+      },{
+        $addFields: {
+          eleve: {
+            $concat: [
+              { $arrayElemAt: ["$eleve.nom", 0] }," ",
+              { $toString: { $arrayElemAt: ["$eleve.prenom", 0] } },
+            ]
+          },
+          niveau : {$arrayElemAt: ["$niveau.libelle", 0]}
+        }
+      },
+      {
+        $group: filterGroupBy
+      },{
+        $addFields: {
+          moyenne: { $round: ["$moyenne", 2] } 
+        }
+      }
+    ];
+
+    // filtre par ordre asc = 1 ou desc = -1
+    if(order){
+      pipeline.push({
+        $sort: {
+        "moyenne": Number(order)
+        }
+      });
+    }
+
+    const result = await Professeur.aggregate(pipeline);
+    return result;
+  } catch (err) {
+    res.status(400).json({
+      status: 400,
+      message: err.message,
+    });
+  }
+};

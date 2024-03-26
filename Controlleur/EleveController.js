@@ -49,3 +49,12 @@ exports.ficheDetailAssignementEleve = async (req, res) => {
     .then((result) => res.status(200).json({ result }))
     .catch();
 };
+
+exports.getPerformanceOneEleve = async (req, res) => {
+  try {
+    res.status(200).json({
+      status: 200,
+      data: await eleveRepository.getPerformanceOneEleve(req.query.idEleve,req.query.idMatiere,req.query.idNiveau,req.query.order,res),
+    });
+  } catch (err) {}
+};
