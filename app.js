@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors = require("cors");
 const bodyParser = require("body-parser");
-
+var config = require('./config/SECRET');
 // Importation des routers
 var indexRouter = require('./routes/index');
 const adminRoutes = require("./routes/Admin");
@@ -13,6 +13,23 @@ const niveauRoutes = require("./routes/Niveau");
 const eleveRoutes = require("./routes/Eleve");
 const professeurRoutes = require("./routes/Professeur");
 const utilisateurRoutes = require("./routes/Utilisateur");
+var jwt = require('jsonwebtoken');
+
+const verifyToken = (req, res, next) => {
+  const token = req.headers['autorisation'];
+
+  if (!token) {
+    return res.status(401).json({ message: 'Token non fourni' });
+  }
+
+  jwt.verify(token, config.secret, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: 'Token invalide' });
+    }
+    req.user = decoded; 
+    next(); 
+  });
+};
 
 var app = express();
 
@@ -32,6 +49,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use((req, res, next) => {
+  if (req.path.startsWith('/Utilisateur')) {
+    return next(); 
+  }
+  verifyToken(req, res, next); // Appliquer le middleware de vérification du token
+});
 
 // Definition des routes
 app.use('', indexRouter);
