@@ -156,3 +156,15 @@ exports.getListeDetailAssignementEleve = async (req, res) => {
   }
   catch (err) {}
 };
+
+exports.getListeDetailAssignementRenduParEleve = async (req, res) => {
+  try {
+    //idProf,idMatiere,idNiveau, page, pageNumber, res
+    let data = await professeurRepository.getListeDetailAssignementRenduParEleve(req.query.idProf, req.query.idMatiere,req.query.idNiveau, req.query.page, req.query.pageNumber, res);
+    res.status(200).json({
+      status: 200,
+      data: data,
+    });
+  }
+  catch (err) {}
+};
