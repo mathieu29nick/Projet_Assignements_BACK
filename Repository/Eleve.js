@@ -366,11 +366,11 @@ exports.ficheDetailAssignementEleve = async (idEleve,idAss, res) => {
 // Performance d’un eleve dans un matiere / dans un niveau
 exports.getPerformanceOneEleve = async (idEleve,idMatiere,idNiveau,order,res) => {
   try {
-    let filter={
-      "matiere.assignements.detailAssignementEleve.idEleve": ObjectID(idEleve)
+    let filter={};
+    if(idEleve){
+      filter={ "matiere.assignements.detailAssignementEleve.idEleve": ObjectID(idEleve)};
     };
     let filterGroupBy={}
-    let filterOrder={}
 
     // filtre % au Niveau
     if(idNiveau){
@@ -466,3 +466,5 @@ exports.getPerformanceOneEleve = async (idEleve,idMatiere,idNiveau,order,res) =>
     });
   }
 };
+
+
