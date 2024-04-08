@@ -130,6 +130,7 @@ exports.listeMatiere = async (page, pageNumber, res) => {
       page: page,
       pageNumber: pageNumber,
       totalPage: totalPage,
+      dataLength:data.length,
     };
   } catch (err) {
     res.status(400).json({
@@ -305,6 +306,7 @@ exports.getAllProf = async (page,pageNumber,res) => {
       totalPage : totalPage,
       page:page,
       pageNumber : pageNumber,
+      dataLength:data.length,
       data : await Professeur.find().select('-matiere').select('-mdp').skip(Number(page)*pageNumber).limit(Number(pageNumber))
     }
   } catch (err) {
@@ -431,6 +433,7 @@ exports.listeAssignementProf = async (idProf, matiere, page , pageNumber, res) =
     totalPage : totalPage,
     page:page,
     pageNumber : pageNumber,
+    dataLength:data.length,
     data : assignement
   }
   }catch (err) {
@@ -670,6 +673,7 @@ exports.getListeDetailAssignementEleve = async (idProf,idMatiere,idNiveau,orderd
       page: page,
       pageNumber: pageNumber,
       totalPage: totalPage,
+      dataLength:result.length,
     };
   } catch (err) {
     res.status(400).json({
@@ -775,6 +779,7 @@ exports.getListeDetailAssignementRenduParEleve = async (idProf,idMatiere,idNivea
       liste: data,
       page: page,
       pageNumber: pageNumber,
+      dataLength:result.length,
       totalPage: totalPage,
     };
   } catch (err) {

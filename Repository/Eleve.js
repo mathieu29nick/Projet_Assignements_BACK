@@ -175,13 +175,13 @@ exports.getListeDetailAssignement = async (idEleve,idMatiere,idNiveau,orderdateR
       });
     }
 
-    console.log(tripipeline);
     const data = await Professeur.aggregate([...pipeline, ...tripipeline,...newpipeline]);
 
     return {
       liste: data,
       page: page,
       pageNumber: pageNumber,
+      dataLength:result.length,
       totalPage: totalPage,
     };
   } catch (err) {
