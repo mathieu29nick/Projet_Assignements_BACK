@@ -1,3 +1,4 @@
 module.exports = {
-    'secret': 'MDP_CRYPTER'
+    'secret': 'MDP_CRYPTER',
+    'time' : 43200 
 };

@@ -27,7 +27,7 @@ exports.login = async (email, mdp, res) => {
       };
   
       let token = await new Promise((resolve, reject) => {
-        jwt.sign(payload, config.secret, { expiresIn: 3600 }, (err, token) => {
+        jwt.sign(payload, config.secret, { expiresIn: config.time }, (err, token) => {
           if (err) reject(err);
           console.log("Access TOKEN :", token);
           resolve(token); // Résoudre la promesse avec le token
