@@ -20,9 +20,10 @@ const detailAssignementEleveSchema = new mongoose.Schema({
   
   const matiereSchema = new mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
+    idMatiere: Number,
     libelle: String,
     photo: String,
-    niveau: Number,
+    idNiveau: Number,
     assignements: [assignementSchema] 
   });
 // Creation du schéma Professeur
