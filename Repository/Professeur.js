@@ -157,7 +157,7 @@ exports.insertionMatiere = async (idProf,libelle,idNiveau,photo,res) => {
     };
     await Professeur.findOneAndUpdate(
       {
-        idProf: Number(idProf)
+        idProf: ObjectID(idProf)
       },
       {
         $push: {
