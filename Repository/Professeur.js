@@ -48,7 +48,7 @@ exports.login = async (email, mdp, res) => {
 // Liste matière d'un prof
 exports.listeMatiereProf = async (idProf, res) => {
   try{
-    const match =  { $match: { _id: ObjectID(idProf) } };
+    const match =  idProf ? { $match: { _id: ObjectID(idProf) } } : {$match: {  }};
     var unwind = { $unwind: "$matiere" };
     var lookup = {
       $lookup: {
@@ -82,24 +82,21 @@ exports.listeMatiereProf = async (idProf, res) => {
 //get liste des matières avec pagination
 exports.listeMatiere = async (page, pageNumber, res) => {
   try {
-    if (!pageNumber) pageNumber = 20;
-    const data = await Professeur.find();
-    const number = data.length;
-    let totalPage = Math.floor(Number(number) / pageNumber);
-    if (Number(number) % pageNumber != 0) {
-      totalPage = totalPage + 1;
-    }
+    pageNumber = pageNumber || 2;
+    page = page || 0;
+    
     var pipeline = [
-      {
-        $project: {
-          _id: 0,
-          idProf: 0,
-          email: 0,
-          mdp: 0,
-          photo: 0,
-          "matiere.assignements":0
-        }
-      },
+      // {
+      //   $project: {
+      //     _id: 0,
+      //     idProf: 0,
+      //     email: 0,
+      //     mdp: 0,
+      //     photo: 0,
+      //     nom: 0,
+      //     "matiere.assignements":0
+      //   }
+      // },
       { $unwind: "$matiere" },
       {
         $lookup: {
@@ -113,18 +110,27 @@ exports.listeMatiere = async (page, pageNumber, res) => {
         $addFields: {
           "matiere.idNiveau": {
             $arrayElemAt: ["$niveauData.libelle", 0]
-          }
+          },
+          "matiere.prof": "$nom"
         }
       },
-      {
-        $project: {
-          "niveauData": 0
-        }
-      },
-      { $skip: Number(page * pageNumber) },
-      { $limit: Number(pageNumber) }
+      { $project: { "_id": "$matiere._id",
+      "idMatiere": "$matiere.idMatiere",
+      "libelle": "$matiere.libelle",
+      "idNiveau": "$matiere.idNiveau",
+      "prof":"$matiere.prof",
+      "photo": "$matiere.photo"} }
     ];
-
+    const data = await Professeur.aggregate(pipeline);
+    const number = data.length;
+    let totalPage = Math.floor(Number(number) / pageNumber);
+    if (Number(number) % pageNumber != 0) {
+      totalPage = totalPage + 1;
+    }
+    pipeline = [
+     ...pipeline,
+      { $skip: Number(page * pageNumber) },
+      { $limit: Number(pageNumber) }];
     return {
       liste: await Professeur.aggregate(pipeline),
       page: page,
