@@ -376,7 +376,7 @@ exports.listeAssignementProf = async (idProf, matiere, page , pageNumber, res) =
     pageNumber = Number(pageNumber) || 2;
     page = Number(page) || 0;
     const match = {
-      _id: ObjectID(idProf),
+      ...(idProf && {_id: ObjectID(idProf)}),
       ...(matiere && { "matiere._id": ObjectID(matiere) }),
      };
     const propreties = [ {
