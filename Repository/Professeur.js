@@ -399,7 +399,8 @@ exports.listeAssignementProf = async (idProf, matiere, page , pageNumber, res) =
     { 
       $addFields: { 
         "matiere.assignements.matiere": "$matiere.libelle" ,
-        "matiere.assignements.niveau": "$matiere.idNiveau" 
+        "matiere.assignements.niveau": "$matiere.idNiveau" ,
+        "matiere.assignements.prof": "$nom"
       } 
     },
     {
