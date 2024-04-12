@@ -454,7 +454,7 @@ exports.listeAssignementProf = async (idProf, matiere, page , pageNumber, res) =
 // Fiche assignement
 exports.getOneAssignement = async(idAssignement, res) => {
   try{
-    return await Professeur.aggregate([{
+    const data = await Professeur.aggregate([{
       $unwind: "$matiere"
     },
     { 
@@ -467,6 +467,7 @@ exports.getOneAssignement = async(idAssignement, res) => {
       $addFields: { 
         "matiere.assignements.matiere": "$matiere.libelle" ,
         "matiere.assignements.niveau": "$matiere.idNiveau",
+        "matiere.assignements.prof": "$nom",
         "matiere.assignements.detailAssignementEleve": { $size: "$matiere.assignements.detailAssignementEleve" }
       } 
     },
@@ -484,7 +485,8 @@ exports.getOneAssignement = async(idAssignement, res) => {
       $addFields: {
         niveau: { $arrayElemAt: ["$niveau.libelle", 0] }
       }
-    }])
+    }]);
+    return data.length > 0 ? data [0] : {};
 
   }catch (err) {
     res.status(400).json({
