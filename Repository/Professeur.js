@@ -195,14 +195,13 @@ exports.insertionAssignementMatiere = async (idMatiere,dateRendu,nomAss,desc,res
             rendu : false
         });
     }
-
-
+    const dateParts = dateRendu.split('/');
     const assignement = {
       _id : ObjectID(),
-      dateRenduEleve : new Date(dateRendu),
+      dateRendu :  new Date(parseInt(dateParts[0], 10), parseInt(dateParts[1], 10) - 1, parseInt(dateParts[2], 10)+1),
       nomAssignement : nomAss,
       description : desc,
-      status : false,
+      statut : false,
       detailAssignementEleve : detailAssignementEleve
     };
 
