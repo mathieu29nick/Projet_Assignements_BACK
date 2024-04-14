@@ -188,13 +188,14 @@ exports.insertionAssignementMatiere = async (idMatiere,dateRendu,nomAss,desc,res
     
     for(var i=0;i<listeEleve.length;i++){
         detailAssignementEleve.push({
-            idEleve : Number(listeEleve[i].idEleve),
+            idEleve : ObjectID(listeEleve[i]._id),
             note : null,
             remarque : "",
             dateRenduEleve : null,
             rendu : false
         });
     }
+
 
     const assignement = {
       _id : ObjectID(),
@@ -716,9 +717,9 @@ exports.getListeDetailAssignementRenduParEleve = async (idProf,idMatiere,idNivea
       },
       {
         $match: {
-          "matiere.assignements.detailAssignementEleve.idProf": ObjectID(idProf),
           "matiere.assignements.detailAssignementEleve.dateRenduEleve" : { $ne: null },
           "matiere.assignements.detailAssignementEleve.rendu" : false,
+          ... ( idProf && {"matiere.assignements.detailAssignementEleve.idProf": ObjectID(idProf)})
         }
       },{
         $replaceRoot : { 
@@ -750,20 +751,6 @@ exports.getListeDetailAssignementRenduParEleve = async (idProf,idMatiere,idNivea
         }
       }
     ];
-
-    const result = await Professeur.aggregate(pipeline);
-  
-    const total = result.length;
-    let totalPage = Math.floor(Number(total) / pageNumber);
-    if (Number(total) % pageNumber != 0) {
-      totalPage = totalPage + 1;
-    }
-
-    var newpipeline = [
-      { $skip: Number(page * pageNumber) },
-      { $limit: Number(pageNumber) }
-    ];
-    
     var tripipeline = [];
 
     if(idMatiere && (idMatiere!=="" || idMatiere!==null)){
@@ -781,6 +768,21 @@ exports.getListeDetailAssignementRenduParEleve = async (idProf,idMatiere,idNivea
         }
       });
     }
+
+    const result = await Professeur.aggregate([...pipeline,...tripipeline]);
+    console.log(result);
+  
+    const total = result.length;
+    let totalPage = Math.floor(Number(total) / pageNumber);
+    if (Number(total) % pageNumber != 0) {
+      totalPage = totalPage + 1;
+    }
+
+    var newpipeline = [
+      { $skip: Number(page * pageNumber) },
+      { $limit: Number(pageNumber) }
+    ];
+    
 
     const data = await Professeur.aggregate([...pipeline, ...tripipeline,...newpipeline]);
 

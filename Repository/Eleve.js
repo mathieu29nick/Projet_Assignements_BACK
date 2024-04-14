@@ -196,7 +196,7 @@ exports.getListeDetailAssignement = async (idEleve,idMatiere,idNiveau,orderdateR
 // Fiche devoir Eleve
 exports.getOneAssignementEleve = async (idAssignement, idEleve , res) => {
   try{
-    return await Professeur.aggregate([{
+    const data = await Professeur.aggregate([{
       $unwind: "$matiere"
     },
     { 
@@ -249,7 +249,7 @@ exports.getOneAssignementEleve = async (idAssignement, idEleve , res) => {
         niveau : {$arrayElemAt: ["$niveau.libelle", 0]}
       }
     }])
-
+    return data.length > 0 ? data [0] : {};
   }catch (err) {
     res.status(400).json({
       status: 500,

@@ -3,9 +3,9 @@ const Schema = mongoose.Schema;
 
 const detailAssignementEleveSchema = new mongoose.Schema({
     idEleve: { type: mongoose.Schema.Types.ObjectId, ref: 'Eleve' },
-    note: Number,
-    remarque: String,
-    dateRenduEleve: Date,
+    note: Number|null,
+    remarque: String|null,
+    dateRenduEleve: Date|null,
     rendu: Boolean
   });
   
