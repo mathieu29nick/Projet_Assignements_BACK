@@ -15,6 +15,7 @@ router.post('/', professeurControlleur.createProf);
 router.get('/assignements',professeurControlleur.listeAssignementProf)
 router.get('/assignements/assignement',professeurControlleur.getOneAssignement)
 router.put('/assignement/eleve/validation/:idAssignement/:idEleve',professeurControlleur.validationDevoirRendu)
+router.put('/assignements/eleves/validations',professeurControlleur.validerDevoirRenduMultiple)
 router.put('/acheveAssignement/:idAssignement',professeurControlleur.acheverAssignement)
 router.get('/assignementsEleve', professeurControlleur.getListeDetailAssignementEleve);
 router.get('/assignementsEleveNonApprouve', professeurControlleur.getListeDetailAssignementRenduParEleve);

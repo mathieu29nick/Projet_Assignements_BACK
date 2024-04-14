@@ -195,10 +195,9 @@ exports.insertionAssignementMatiere = async (idMatiere,dateRendu,nomAss,desc,res
             rendu : false
         });
     }
-    const dateParts = dateRendu.split('/');
     const assignement = {
       _id : ObjectID(),
-      dateRendu :  new Date(parseInt(dateParts[0], 10), parseInt(dateParts[1], 10) - 1, parseInt(dateParts[2], 10)+1),
+      dateRendu :  new Date(dateRendu),
       nomAssignement : nomAss,
       description : desc,
       statut : false,
@@ -531,6 +530,13 @@ exports.validationDevoirRendu = async (idAssignement, idEleve, res) => {
       message: err.message,
     });
   }
+}
+
+// validation devoir rendu multiple
+exports.validerDevoirRenduMultiple = async(detailAss, res) => {
+  detailAss.forEach(element => {
+    this.validationDevoirRendu(element.idAssignement,element.idEleve,res);
+  });
 }
 
 // achever assignement
