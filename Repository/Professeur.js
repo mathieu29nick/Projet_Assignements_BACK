@@ -480,26 +480,51 @@ exports.getOneAssignement = async(idAssignement, res) => {
         foreignField: "idNiveau",
         as: "niveau"
       }
-    }, {
+    },{
+      $addFields: {
+        niveau: { $arrayElemAt: ["$niveau.libelle", 0] }
+      }
+    },
+    {
+      $unwind: "$detailAssignementEleve"
+    },
+    {
       $lookup: {
         from: "Eleve",
         localField: "detailAssignementEleve.idEleve",
         foreignField: "_id",
-        as: "eleve"
+        as: "detailAssignementEleve.eleve"
       }
     },
     {
       $addFields: {
         "detailAssignementEleve.eleve": {   $concat: [
-          { $arrayElemAt: ["$eleve.prenom", 0] }, 
+          { $arrayElemAt: ["$detailAssignementEleve.eleve.prenom", 0] }, 
           " ", 
-          { $arrayElemAt: ["$eleve.nom", 0] } 
+          { $arrayElemAt: ["$detailAssignementEleve.eleve.nom", 0] } 
         ] }
       }
-    },{
-      $addFields: {
-        niveau: { $arrayElemAt: ["$niveau.libelle", 0] }
+    },
+    {
+      $group: {
+        _id: "$_id",
+        dateRendu: { $first: "$dateRendu" },
+        nomAssignement: { $first: "$nomAssignement" },
+        description: { $first: "$description" },
+        statut: { $first: "$statut" },
+        detailAssignementEleve: { $push: "$detailAssignementEleve" }
       }
+    },
+    {
+      $project: {
+        _id: 1,
+        dateRendu: 1,
+        nomAssignement: 1,
+        description: 1,
+        statut: 1,
+        detailAssignementEleve: 1
+      }
+    
     }]);
     return data.length > 0 ? data [0] : {};
 
