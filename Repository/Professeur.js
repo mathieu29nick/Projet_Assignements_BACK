@@ -512,19 +512,11 @@ exports.getOneAssignement = async(idAssignement, res) => {
         nomAssignement: { $first: "$nomAssignement" },
         description: { $first: "$description" },
         statut: { $first: "$statut" },
+        prof: {$first: "$prof"},
+        matiere: {$first: "$matiere"},
+        niveau: {$first: "$niveau"},
         detailAssignementEleve: { $push: "$detailAssignementEleve" }
       }
-    },
-    {
-      $project: {
-        _id: 1,
-        dateRendu: 1,
-        nomAssignement: 1,
-        description: 1,
-        statut: 1,
-        detailAssignementEleve: 1
-      }
-    
     }]);
     return data.length > 0 ? data [0] : {};
 
