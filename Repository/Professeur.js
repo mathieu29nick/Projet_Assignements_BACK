@@ -467,7 +467,7 @@ exports.getOneAssignement = async(idAssignement, res) => {
         "matiere.assignements.matiere": "$matiere.libelle" ,
         "matiere.assignements.niveau": "$matiere.idNiveau",
         "matiere.assignements.prof": "$nom",
-        "matiere.assignements.detailAssignementEleve": { $size: "$matiere.assignements.detailAssignementEleve" }
+        // "matiere.assignements.detailAssignementEleve": { $size: "$matiere.assignements.detailAssignementEleve" }
       } 
     },
     {
@@ -481,6 +481,18 @@ exports.getOneAssignement = async(idAssignement, res) => {
         as: "niveau"
       }
     }, {
+      $lookup: {
+        from: "Eleve",
+        localField: "detailAssignementEleve.idEleve",
+        foreignField: "_id",
+        as: "eleve"
+      }
+    },
+    {
+      $addFields: {
+        "detailAssignementEleve.eleve": { $arrayElemAt: ["$eleve.nom", 0] }
+      }
+    },{
       $addFields: {
         niveau: { $arrayElemAt: ["$niveau.libelle", 0] }
       }
