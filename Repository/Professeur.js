@@ -805,3 +805,78 @@ exports.getListeDetailAssignementRenduParEleve = async (idProf,idMatiere,idNivea
     });
   }
 };
+
+// Liste detail assignement des étudiants (par assignement)
+exports.getListeDetailAssignementParAssignement = async (idProf,idAssignement, res) => {
+  try {
+    var pipeline = [
+      { $unwind: "$matiere" },
+      { $unwind: "$matiere.assignements" },
+      { $unwind: "$matiere.assignements.detailAssignementEleve" },
+      {
+        $addFields: {
+          "matiere.assignements.detailAssignementEleve.matiere" : "$matiere.libelle",
+          "matiere.assignements.detailAssignementEleve.idMatiere" : "$matiere._id",
+          "matiere.assignements.detailAssignementEleve.assignement" : "$matiere.assignements.nomAssignement",
+          "matiere.assignements.detailAssignementEleve.niveau" : "$matiere.idNiveau",
+          "matiere.assignements.detailAssignementEleve.idNiveau" : "$matiere.idNiveau",
+          "matiere.assignements.detailAssignementEleve.idAssignement": "$matiere.assignements._id" 
+        }
+      },
+      {
+        $match: {
+          "_id": ObjectID(idProf)
+        }
+      },{
+        $replaceRoot : { 
+          newRoot : "$matiere.assignements.detailAssignementEleve"
+        }
+      },{
+        $lookup: {
+          from: "Eleve",
+          localField: "idEleve",
+          foreignField: "_id",
+          as: "eleve",
+        }
+      },{
+        $lookup: {
+          from: "Niveau",
+          localField: "niveau",
+          foreignField: "idNiveau",
+          as: "niveau",
+        }
+      },{
+        $addFields: {
+          eleve: {
+            $concat: [
+              { $arrayElemAt: ["$eleve.nom", 0] }," ",
+              { $toString: { $arrayElemAt: ["$eleve.prenom", 0] } },
+            ]
+          },
+          niveau : {$arrayElemAt: ["$niveau.libelle", 0]}
+        }
+      }
+    ];
+
+    var tripipeline = [];
+
+    if(idAssignement && (idAssignement!=="" || idAssignement!==null)){
+      tripipeline.push({
+        $match: {
+        "idAssignement": ObjectID(idAssignement)
+        }
+      });
+    }
+    
+    const data = await Professeur.aggregate([...pipeline, ...tripipeline]);
+
+    return {
+      liste: data
+    };
+  } catch (err) {
+    res.status(400).json({
+      status: 400,
+      message: err.message,
+    });
+  }
+};

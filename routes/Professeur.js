@@ -19,4 +19,5 @@ router.put('/assignements/eleves/validations',professeurControlleur.validerDevoi
 router.put('/acheveAssignement/:idAssignement',professeurControlleur.acheverAssignement)
 router.get('/assignementsEleve', professeurControlleur.getListeDetailAssignementEleve);
 router.get('/assignementsEleveNonApprouve', professeurControlleur.getListeDetailAssignementRenduParEleve);
+router.get('/assignementsEleveParAssignement', professeurControlleur.getListeDetailAssignementParAssignement);
 module.exports = router;
