@@ -490,7 +490,11 @@ exports.getOneAssignement = async(idAssignement, res) => {
     },
     {
       $addFields: {
-        "detailAssignementEleve.eleve": { $arrayElemAt: ["$eleve.nom", 0] }
+        "detailAssignementEleve.eleve": {   $concat: [
+          { $arrayElemAt: ["$eleve.prenom", 0] }, 
+          " ", 
+          { $arrayElemAt: ["$eleve.nom", 0] } 
+        ] }
       }
     },{
       $addFields: {
