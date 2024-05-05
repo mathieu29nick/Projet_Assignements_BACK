@@ -467,4 +467,75 @@ exports.getPerformanceOneEleve = async (idEleve,idMatiere,idNiveau,order,res) =>
   }
 };
 
+// get liste eleves
+exports.getAllEleves = async (page,pageNumber,res) => {
+  try {
+    pageNumber = pageNumber || 2;
+    page = page || 0;
+    let data = await Eleve.find();
+    const total = data.length;
+    let totalPage = Math.floor(Number(total) / pageNumber);
+    if (Number(total) % pageNumber != 0) {
+      totalPage = totalPage + 1;
+    }
+    return {
+      totalPage : totalPage,
+      page:page,
+      pageNumber : pageNumber,
+      dataLength:data.length,
+      data : await Eleve.find().select('-niveau').select('-mdp').skip(Number(page)*pageNumber).limit(Number(pageNumber))
+    }
+  } catch (err) {
+    res.status(400).json({
+      status: 500,
+      message: err.message,
+    });
+  }
+};
+
+// create eleve
+exports.createEleve = async (eleve , res) => {
+  try {
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const onlySpaces =/^\s*$/;
+    eleve.idEleve = Math.floor(Math.random() * (1000)) + 7;
+    if(!eleve.email){
+      throw new Error("Entrez un email");
+    }else if(!regexEmail.test(eleve.email)){
+      throw new Error("Veuillez saisir un email valide");
+    }
+    if(!eleve.nom){
+      throw new Error("Entrez un nom");
+    }else if(eleve.nom.match(onlySpaces) ){
+      throw new Error("Le nom n'est pas valide");
+    }
+    if(!eleve.prenom){
+      throw new Error("Entrez un prenom");
+    }else if(eleve.prenom.match(onlySpaces) ){
+      throw new Error("Le prenom n'est pas valide");
+    }
+    eleve.mdp = "mot de passe";
+    eleve.niveau = [
+      {
+        "idNiveau": 1,
+        "etatNiveau": false
+      },
+      {
+        "idNiveau": 2,
+        "etatNiveau": false
+      },
+      {
+        "idNiveau": 3,
+        "etatNiveau": true
+      }
+    ];
+    let data = await Eleve.create(eleve);
+    return data;
+  } catch (err) {
+    res.status(400).json({
+      status: 500,
+      message: err.message,
+    });
+  }
+}
 

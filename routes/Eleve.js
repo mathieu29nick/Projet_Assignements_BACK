@@ -10,5 +10,7 @@ router.get('/assignement', eleveControlleur.getOneAssignementEleve);
 router.put('/assignement/:idAssignement/:idEleve', eleveControlleur.rendreDevoir);
 router.get("/ficheAssignement/:idEleve/:idAss", eleveControlleur.ficheDetailAssignementEleve);
 router.get("/performance", eleveControlleur.getPerformanceOneEleve);
+router.get('/eleves', eleveControlleur.getAllEleves);
+router.post('/', eleveControlleur.createEleve);
 
 module.exports = router;

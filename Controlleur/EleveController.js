@@ -58,3 +58,33 @@ exports.getPerformanceOneEleve = async (req, res) => {
     });
   } catch (err) {}
 };
+
+exports.getAllEleves = async (req, res) => {
+  try {
+    let data = await eleveRepository.getAllEleves(req.query.page, req.query.pageNumber, res);
+    res.status(200).json({
+      status: 200,
+      data: data,
+    });
+  }
+  catch (err) {}
+};
+
+exports.createEleve = async (req, res) => {
+  try {
+    let data = await eleveRepository.createEleve(
+      {
+        email: req.body.email,
+        nom: req.body.nom,
+        prenom: req.body.prenom,
+        photo: req.body.photo,
+      },
+      res,
+    );
+    res.status(200).json({
+      status: 200,
+      data: data,
+    });
+  }
+  catch (err) {}
+};

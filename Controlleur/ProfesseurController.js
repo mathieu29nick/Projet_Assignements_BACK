@@ -191,3 +191,4 @@ exports.getListeDetailAssignementParAssignement = async (req, res) => {
   }
   catch (err) {}
 };
+
