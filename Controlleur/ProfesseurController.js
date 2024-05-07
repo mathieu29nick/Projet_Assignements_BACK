@@ -44,6 +44,13 @@ exports.insertionAssignementMatiere = async (req, res) => {
     .catch();
 };
 
+exports.modificationAssignement = async (req, res) => {
+  professeurRepository
+    .modificationAssignement(req.params.idAssignement, req.body.dateRendu, req.body.nomAssignement, req.body.description, res)
+    .then((result) => res.status(200).json({result}))
+    .catch();
+};
+
 exports.getOneAssignementModifierNote = async (req, res) => {
   try {
     res.status(200).json({

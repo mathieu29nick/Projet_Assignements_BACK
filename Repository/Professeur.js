@@ -913,3 +913,42 @@ exports.getListeDetailAssignementParAssignement = async (idProf,idAssignement, r
     });
   }
 };
+
+// modification d'une assignement d'une matière par un Professeur
+exports.modificationAssignement = async (idAssignement,dateRendu,nomAss,desc,res) => {
+  try {
+    const filter = {
+      "matiere.assignements._id": ObjectID(idAssignement),
+      "matiere.assignements.statut": false,
+    };
+    const update = {
+      $set: {
+        "matiere.$[].assignements.$[inner].dateRendu": new Date(dateRendu),
+        "matiere.$[].assignements.$[inner].description": desc,
+        "matiere.$[].assignements.$[inner].nomAssignement": nomAss,
+      }
+    };
+  
+    const options = {
+      arrayFilters: [
+        { "inner._id": ObjectID(idAssignement),"inner.statut": false }
+      ]
+    };
+
+    const professeur = await Professeur.updateOne(filter, update, options);
+
+    if (!professeur || professeur.modifiedCount === 0) {
+      return res.status(400).json({
+         status: 400,
+         message: "La modification de ce devoir n'est pas possible, ce devoir est déjà clôturé.",
+       });
+     }
+ 
+     return professeur;
+   }catch (err) {
+     res.status(400).json({
+       status: 500,
+       message: err.message,
+     });
+   }
+};
