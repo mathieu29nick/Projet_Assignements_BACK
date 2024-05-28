@@ -80,7 +80,7 @@ exports.listeMatiereProf = async (idProf, res) => {
   }
 }
 //get liste des matières avec pagination
-exports.listeMatiere = async (page, pageNumber, res) => {
+exports.listeMatiere = async (page, pageNumber, idNiveau,res) => {
   try {
     pageNumber = pageNumber || 2;
     page = page || 0;
@@ -111,16 +111,27 @@ exports.listeMatiere = async (page, pageNumber, res) => {
           "matiere.idNiveau": {
             $arrayElemAt: ["$niveauData.libelle", 0]
           },
-          "matiere.prof": "$nom"
+          "matiere.prof": "$nom",
+          "matiere.niveau": "$matiere.idNiveau"
         }
       },
       { $project: { "_id": "$matiere._id",
       "idMatiere": "$matiere.idMatiere",
       "libelle": "$matiere.libelle",
       "idNiveau": "$matiere.idNiveau",
-      "prof":"$matiere.prof",
+      "prof":"$matiere.prof", 
+      "niveau": "$matiere.niveau",
       "photo": "$matiere.photo"} }
     ];
+    
+    if(idNiveau){
+      pipeline=[
+        ...pipeline,{
+        $match: {
+        "niveau": Number(idNiveau)
+        }
+      }];
+    }
     const data = await Professeur.aggregate(pipeline);
     const number = data.length;
     let totalPage = Math.floor(Number(number) / pageNumber);

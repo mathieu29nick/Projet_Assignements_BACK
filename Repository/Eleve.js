@@ -88,7 +88,8 @@ exports.getListeDetailAssignement = async (idEleve,idMatiere,idNiveau,orderdateR
           "matiere.assignements.detailAssignementEleve.assignement" : "$matiere.assignements.nomAssignement",
           "matiere.assignements.detailAssignementEleve.niveau" : "$matiere.idNiveau",
           "matiere.assignements.detailAssignementEleve.idNiveau" : "$matiere.idNiveau",
-          "matiere.assignements.detailAssignementEleve.idAssignement": "$matiere.assignements._id" 
+          "matiere.assignements.detailAssignementEleve.idAssignement": "$matiere.assignements._id",
+          "matiere.assignements.detailAssignementEleve.dateRendu": "$matiere.assignements.dateRendu" 
         }
       },
       {
@@ -125,20 +126,6 @@ exports.getListeDetailAssignement = async (idEleve,idMatiere,idNiveau,orderdateR
         }
       }
     ];
-
-    const result = await Professeur.aggregate(pipeline);
-  
-    const total = result.length;
-    let totalPage = Math.floor(Number(total) / pageNumber);
-    if (Number(total) % pageNumber != 0) {
-      totalPage = totalPage + 1;
-    }
-
-    var newpipeline = [
-      { $skip: Number(page * pageNumber) },
-      { $limit: Number(pageNumber) }
-    ];
-    
     var tripipeline = [];
 
     if(idMatiere && (idMatiere!=="" || idMatiere!==null)){
@@ -152,7 +139,7 @@ exports.getListeDetailAssignement = async (idEleve,idMatiere,idNiveau,orderdateR
     if(orderdateRendu && (orderdateRendu!=="" || orderdateRendu!==null)){
       tripipeline.push({
         $sort: {
-        "dateRenduEleve": Number(orderdateRendu)
+        "dateRendu": Number(orderdateRendu)
         }
       });
     }
@@ -175,6 +162,21 @@ exports.getListeDetailAssignement = async (idEleve,idMatiere,idNiveau,orderdateR
       });
     }
 
+
+    const result = await Professeur.aggregate([...pipeline, ...tripipeline]);
+  
+    const total = result.length;
+    let totalPage = Math.floor(Number(total) / pageNumber);
+    if (Number(total) % pageNumber != 0) {
+      totalPage = totalPage + 1;
+    }
+
+    var newpipeline = [
+      { $skip: Number(page * pageNumber) },
+      { $limit: Number(pageNumber) }
+    ];
+    
+   
     const data = await Professeur.aggregate([...pipeline, ...tripipeline,...newpipeline]);
 
     return {
@@ -214,7 +216,8 @@ exports.getOneAssignementEleve = async (idAssignement, idEleve , res) => {
         "matiere.assignements.detailAssignementEleve.niveau": "$matiere.idNiveau",
         "matiere.assignements.detailAssignementEleve.assignement": "$matiere.assignements.nomAssignement",
         "matiere.assignements.detailAssignementEleve.dateRendu": "$matiere.assignements.dateRendu",
-        "matiere.assignements.detailAssignementEleve.idAssignement": "$matiere.assignements._id"  
+        "matiere.assignements.detailAssignementEleve.idAssignement": "$matiere.assignements._id"  ,
+        "matiere.assignements.detailAssignementEleve.description": "$matiere.assignements.description"  
       } 
     },
     {
