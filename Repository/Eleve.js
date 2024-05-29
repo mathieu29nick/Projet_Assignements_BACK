@@ -76,7 +76,6 @@ exports.getListeDetailAssignement = async (idEleve,idMatiere,idNiveau,orderdateR
     pageNumber = pageNumber || 2;
     page = page || 0;
     if (!pageNumber) pageNumber = 20;
-
     var pipeline = [
       { $unwind: "$matiere" },
       { $unwind: "$matiere.assignements" },
@@ -274,7 +273,6 @@ exports.rendreDevoir = async (idAssignement, idEleve, res) => {
     };
     const update = {
       $set: {
-        "matiere.$[].assignements.$[inner].detailAssignementEleve.$[elem].rendu": false,
         "matiere.$[].assignements.$[inner].detailAssignementEleve.$[elem].dateRenduEleve": ajd
       }
     };

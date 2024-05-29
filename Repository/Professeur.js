@@ -958,7 +958,7 @@ exports.modificationAssignement = async (idAssignement,dateRendu,nomAss,desc,res
      return professeur;
    }catch (err) {
      res.status(400).json({
-       status: 500,
+       status: err.status,
        message: err.message,
      });
    }

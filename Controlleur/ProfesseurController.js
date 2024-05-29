@@ -45,10 +45,14 @@ exports.insertionAssignementMatiere = async (req, res) => {
 };
 
 exports.modificationAssignement = async (req, res) => {
-  professeurRepository
-    .modificationAssignement(req.params.idAssignement, req.body.dateRendu, req.body.nomAssignement, req.body.description, res)
-    .then((result) => res.status(200).json({result}))
-    .catch();
+  try{
+  let data = await professeurRepository.modificationAssignement(req.params.idAssignement, req.body.dateRendu, req.body.nomAssignement, req.body.description, res)
+    res.status(200).json({
+      status: 200,
+      data: data,
+    });
+  }
+  catch (err) {}
 };
 
 exports.getOneAssignementModifierNote = async (req, res) => {
