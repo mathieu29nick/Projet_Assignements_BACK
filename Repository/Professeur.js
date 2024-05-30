@@ -490,6 +490,8 @@ exports.getOneAssignement = async(idAssignement, res) => {
         "matiere.assignements.matiere": "$matiere.libelle" ,
         "matiere.assignements.niveau": "$matiere.idNiveau",
         "matiere.assignements.prof": "$nom",
+        "matiere.assignements.photoProf": "$photo",
+        "matiere.assignements.photoMatiere": "$matiere.photo",
         // "matiere.assignements.detailAssignementEleve": { $size: "$matiere.assignements.detailAssignementEleve" }
       } 
     },
@@ -536,6 +538,8 @@ exports.getOneAssignement = async(idAssignement, res) => {
         description: { $first: "$description" },
         statut: { $first: "$statut" },
         prof: {$first: "$prof"},
+        photoProf: {$first: "$photoProf"},
+        photoMatiere: {$first: "$photoMatiere"},
         matiere: {$first: "$matiere"},
         niveau: {$first: "$niveau"},
         detailAssignementEleve: { $push: "$detailAssignementEleve" }
@@ -808,6 +812,7 @@ exports.getListeDetailAssignementRenduParEleve = async (idProf,idMatiere,idNivea
               { $toString: { $arrayElemAt: ["$eleve.prenom", 0] } },
             ]
           },
+          photoeleve: { $arrayElemAt: ["$eleve.photo", 0] },
           niveau : {$arrayElemAt: ["$niveau.libelle", 0]}
         }
       }
@@ -966,8 +971,7 @@ exports.modificationAssignement = async (idAssignement,dateRendu,nomAss,desc,res
          message: "La modification de ce devoir n'est pas possible, ce devoir est déjà clôturé.",
        });
      }
- 
-     return professeur;
+    return professeur;
    }catch (err) {
      res.status(400).json({
        status: err.status,

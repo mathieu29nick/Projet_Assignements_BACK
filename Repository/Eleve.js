@@ -248,6 +248,7 @@ exports.getOneAssignementEleve = async (idAssignement, idEleve , res) => {
             { $toString: { $arrayElemAt: ["$eleve.prenom", 0] } },
           ]
         },
+        photoeleve : {$arrayElemAt: ["$eleve.photo", 0]},
         niveau : {$arrayElemAt: ["$niveau.libelle", 0]}
       }
     }])
