@@ -365,11 +365,14 @@ exports.ficheDetailAssignementEleve = async (idEleve,idAss, res) => {
 
 
 // Performance d’un eleve dans un matiere / dans un niveau
-exports.getPerformanceOneEleve = async (idEleve,idMatiere,idNiveau,order,res) => {
+exports.getPerformanceOneEleve = async (idEleve,idMatiere,idNiveau,idProf,order,res) => {
   try {
     let filter={};
     if(idEleve){
       filter={ "matiere.assignements.detailAssignementEleve.idEleve": ObjectID(idEleve)};
+    };
+    if(idProf){
+      filter={ "_id": ObjectID(idProf)};
     };
     let filterGroupBy={}
 
