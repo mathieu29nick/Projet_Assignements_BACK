@@ -21,7 +21,7 @@ exports.listeMatiereProf = async (req, res) => {
 };
 exports.listeMatiere = async (req, res) => {
   try {
-    let posts = await professeurRepository.listeMatiere(req.query.page, req.query.pageNumber, req.query.niveau, res);
+    let posts = await professeurRepository.listeMatiere(req.query.page, req.query.pageNumber, req.query.niveau,req.query.idProf, res);
     res.status(200).json({
       status: 200,
       data: posts,

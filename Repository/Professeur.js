@@ -80,7 +80,7 @@ exports.listeMatiereProf = async (idProf, res) => {
   }
 }
 //get liste des matières avec pagination
-exports.listeMatiere = async (page, pageNumber, idNiveau,res) => {
+exports.listeMatiere = async (page, pageNumber, idNiveau,idProf,res) => {
   try {
     pageNumber = pageNumber || 2;
     page = page || 0;
@@ -112,6 +112,7 @@ exports.listeMatiere = async (page, pageNumber, idNiveau,res) => {
             $arrayElemAt: ["$niveauData.libelle", 0]
           },
           "matiere.prof": "$nom",
+          "matiere.idProf": "$_id",
           "matiere.niveau": "$matiere.idNiveau"
         }
       },
@@ -120,6 +121,7 @@ exports.listeMatiere = async (page, pageNumber, idNiveau,res) => {
       "libelle": "$matiere.libelle",
       "idNiveau": "$matiere.idNiveau",
       "prof":"$matiere.prof", 
+      "idProf":"$matiere.idProf",
       "niveau": "$matiere.niveau",
       "photo": "$matiere.photo"} }
     ];
@@ -132,6 +134,16 @@ exports.listeMatiere = async (page, pageNumber, idNiveau,res) => {
         }
       }];
     }
+
+    if(idProf){
+      pipeline=[
+        ...pipeline,{
+        $match: {
+        "idProf": ObjectID(idProf)
+        }
+      }];
+    }
+
     const data = await Professeur.aggregate(pipeline);
     const number = data.length;
     let totalPage = Math.floor(Number(number) / pageNumber);
