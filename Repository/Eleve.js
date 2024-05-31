@@ -3,6 +3,7 @@ var { Professeur } = require("../Model/Professeur");
 var config = require('../config/SECRET');
 var jwt = require('jsonwebtoken');
 var ObjectID = require("mongoose").Types.ObjectId;
+var nodemailer = require("nodemailer");
 
 exports.getEleve = async (res) => {
   try {
@@ -519,7 +520,7 @@ exports.createEleve = async (eleve , res) => {
     }else if(eleve.prenom.match(onlySpaces) ){
       throw new Error("Le prenom n'est pas valide");
     }
-    eleve.mdp = "mot de passe";
+    eleve.mdp = "motdepasse";
     eleve.niveau = [
       {
         "idNiveau": 1,
@@ -535,6 +536,99 @@ exports.createEleve = async (eleve , res) => {
       }
     ];
     let data = await Eleve.create(eleve);
+    var mail = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "soarabe1234@gmail.com",
+        pass: "xtypmdgsbwprqjiy",
+      },
+    });
+    var mailOptions = {
+      from: "soarabe1234@gmail.com",
+      to: eleve.email,
+      subject: "Inscription sur la plateforme gestion des assignements",
+      html: `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          }
+          .header {
+            text-align: center;
+            background-color: #4CAF50;
+            padding: 10px;
+            border-radius: 8px 8px 0 0;
+            color: white;
+          }
+          .content {
+            padding: 20px;
+            line-height: 1.6;
+          }
+          .button-container {
+            text-align: center;
+            margin: 20px 0;
+          }
+          .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+          }
+          .footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #777;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Bienvenue sur Gestion des Assignements</h1>
+          </div>
+          <div class="content">
+            <p>Bonjour ${eleve.nom} ${eleve.prenom},</p>
+            <p>Vous êtes désormais inscrit sur l'application <strong>Gestion des Assignements</strong> en tant qu'étudiant. Vous pouvez y accéder en cliquant sur le bouton ci-dessous.</p>
+            <p>Utilisez votre adresse e-mail comme identifiant et le mot de passe provisoire suivant : <strong>motdepasse</strong>.</p>
+            <p>Nous vous recommandons de changer ce mot de passe dès que possible en vous rendant sur la page de votre profil.</p>
+            <div class="button-container">
+              <a href="https://projet-assignements-front.onrender.com/" class="button">Cliquez ici pour vérifier!</a>
+            </div>
+            <p>Merci et bienvenue,</p>
+            <p>L'équipe Gestion des Assignements</p>
+          </div>
+          <div class="footer">
+            <p>© 2024 Gestion des Assignements. Tous droits réservés.</p>
+          </div>
+        </div>
+      </body>
+      </html>`
+    };
+    mail.sendMail(mailOptions, function (err, info) {
+      if (err) {
+        res.send(err);
+      } else {
+        return data;
+      }
+    });
     return data;
   } catch (err) {
     res.status(400).json({
